@@ -1,7 +1,7 @@
 # enable3d-ammojs-vite-example
 Enable3d Ammojs Vite lite 6 robot
 
-![enable3d-ammojs-vite-example](https://github.com/vitalspace/enable3d-ammojs-vite-example/assets/29004070/52a8441b-9da5-4d81-83f3-93ef3d8e061b)
+![enable3d-ammojs-vite-example](public/picture/enable3D_Lite6.jpg)
 
 ## Install & Run
 
