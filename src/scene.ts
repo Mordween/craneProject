@@ -1,4 +1,4 @@
-import { Project, Scene3D, PhysicsLoader, THREE, ExtendedObject3D } from "enable3d";
+import { Project, Scene3D, PhysicsLoader, THREE, /*ExtendedObject3D */} from "enable3d";
 import { loadRobot, RobotDictionary } from "./robots.ts";
 
 class MainScene extends Scene3D {
@@ -19,10 +19,14 @@ class MainScene extends Scene3D {
   }
 
   create() {
-    const opacity = 0.8
-    const transparent = true
+    // const opacity = 0.8
+    // const transparent = true
 
     console.log("create");
+
+    const axesHelper = new THREE.AxesHelper( 5 );
+    axesHelper.setColors(new THREE.Color(255, 0, 0), new THREE.Color(0, 255, 0), new THREE.Color(0, 0, 255))    // in order to know which axis is the right axis
+    this.scene.add( axesHelper );
 
     // Resize window.
     const resize = () => {
@@ -39,7 +43,18 @@ class MainScene extends Scene3D {
     resize();
 
     // set up scene (light, ground, grid, sky, orbitControls)
-    this.warpSpeed();
+    this.warpSpeed("light", "camera", "lookAtCenter", "grid", "ground",  "orbitControls", "fog", "sky");  
+
+
+    // const geometies = { name: "ground", width: 21, height: 21, depth: 1, z: -0.5 };
+    // const material = {
+    //   phong: { color: 16777215 }
+    // };
+    // let ground;
+
+    // ground = this.physics.add.ground(geometies, material);
+    // ground.body.setRestitution(1);
+    // ground.receiveShadow = true;
 
     // enable physics debug
     this.physics.debug?.enable();
