@@ -15,7 +15,7 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,      // false turns an wunsued fonction into a warning, not an error
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
