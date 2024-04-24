@@ -65,7 +65,7 @@ function loadURDF(scene: Scene3D)
 
         console.log(robot);
 
-        //loadRobot(robotData, robot, scene);
+        // loadRobot(robotData, robot, scene);
     
         // The robot is loaded!
         

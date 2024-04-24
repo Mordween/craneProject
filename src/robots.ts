@@ -42,6 +42,8 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
       console.log(object)
       scene.add.existing(object)
       // scene.physics.add.existing(object, { shape: 'mesh' })
+
+      // TODO disable collision between children and parent links 
     });
 }
 }
