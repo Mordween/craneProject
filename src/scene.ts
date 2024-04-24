@@ -45,16 +45,7 @@ class MainScene extends Scene3D {
     // set up scene (light, ground, grid, sky, orbitControls)
     this.warpSpeed("light", "camera", "lookAtCenter", "grid", "ground",  "orbitControls", "fog", "sky");  
 
-
-    // const geometies = { name: "ground", width: 21, height: 21, depth: 1, z: -0.5 };
-    // const material = {
-    //   phong: { color: 16777215 }
-    // };
-    // let ground;
-
-    // ground = this.physics.add.ground(geometies, material);
-    // ground.body.setRestitution(1);
-    // ground.receiveShadow = true;
+    this.camera.up.set(0,0,1)         // Z up
 
     // enable physics debug
     this.physics.debug?.enable();
@@ -63,10 +54,10 @@ class MainScene extends Scene3D {
     this.camera.position.set(10, 10, 20);
 
     // blue box
-    this.box = this.add.box({ y: 2 }, { lambert: { color: "deepskyblue" } });
+    this.box = this.add.box({ y: 2, z: 10 }, { lambert: { color: "deepskyblue" } });
 
     // pink box
-    this.physics.add.box({ y: 10 }, { lambert: { color: "hotpink" } });
+    this.physics.add.box({ y: 5, z:5 }, { lambert: { color: "hotpink" } });
 
     // green sphere
     const geometry = new THREE.SphereGeometry(0.8, 16, 16);
