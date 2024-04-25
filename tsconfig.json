@@ -17,7 +17,8 @@
     "strict": true,
     "noUnusedLocals": false,      // false turns an wunsued fonction into a warning, not an error
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false,       // Disabling strict type checking for implicit 'any' types.
   },
   "include": ["src"]
 }

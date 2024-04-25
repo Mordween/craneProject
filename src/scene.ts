@@ -1,4 +1,4 @@
-import { Project, Scene3D, PhysicsLoader, THREE, /*ExtendedObject3D */} from "enable3d";
+import { Project, Scene3D, PhysicsLoader, THREE, ExtendedObject3D } from "enable3d";
 import { loadRobot, RobotDictionary } from "./robots.ts";
 
 import URDFLoader from 'urdf-loader';
@@ -12,43 +12,43 @@ const robotLoader = new URDFLoader( robotManager );
 const robotData: RobotDictionary = {
   "base": {
     "joint" : NaN.toString(),
-    "mesh": "src/assets/base.glb",
+    "mesh": "src/meshes/base.glb",
     "t": [0, 0, 0],
     "q": [0, 0, 0, 1]
   },
   "link1": {
     "joint" : "joint1",
-    "mesh": "src/assets/link1.glb",
+    "mesh": "src/meshes/link1.glb",
     "t": [0.0, 0.0, 0.2435],
     "q": [0.0, 0.0, 0.0, 1.0]
   },
   "link2": {
     "joint" : "joint2",
-    "mesh": "src/assets/link2.glb",
+    "mesh": "src/meshes/link2.glb",
     "t": [0.0, 0.0, 0.2435],
     "q": [-0.4999981410979567, -0.5000018143028963, -0.4999963044921138, 0.5000036954879761]
   },
   "link3": {
     "joint" : "joint3",
-    "mesh": "src/assets/link3.glb",
+    "mesh": "src/meshes/link3.glb",
     "t": [7.353756616701401e-07, 5.402371266756581e-12, 0.4436999999986494],
     "q": [0.7071041706433439, 6.493365701876792e-06, 1.2986979459196817e-06, 0.7071093916893005]
   },
   "link4": {
     "joint" : "joint4",
-    "mesh": "src/assets/link4.glb",
+    "mesh": "src/meshes/link4.glb",
     "t": [0.08699906327003075, -7.134198477910336e-07, 0.21608936087324546],
     "q": [1.0, 5.5098144010580686e-06, -3.673194983895874e-06, 1.8366160440284816e-06]
   },
   "link5": {
     "joint" : "joint5",
-    "mesh": "src/assets/link5.glb",
+    "mesh": "src/meshes/link5.glb",
     "t": [0.08699906327003075, -7.134198477910336e-07, 0.21608936087324546],
     "q": [-0.7071067932571579, -1.2986741408059922e-06, 6.493370704012438e-06, 0.7071067690849304]
   },
   "link6": {
     "joint" : "joint6",
-    "mesh": "src/assets/link6.glb",
+    "mesh": "src/meshes/link6.glb",
     "t": [0.08699860411939285, -7.134240641771995e-07, 0.15358936087493202],
     "q": [1.0, 5.509814401058069e-06, -3.6731949838958737e-06, 1.8366160440284816e-06]
   },
@@ -65,7 +65,7 @@ function loadURDF(scene: Scene3D)
 
         console.log(robot);
 
-        // loadRobot(robotData, robot, scene);
+        loadRobot(robotData, robot, scene);
     
         // The robot is loaded!
         
@@ -125,7 +125,7 @@ class MainScene extends Scene3D {
     this.physics.debug?.enable();
 
     // position camera
-    this.camera.position.set(10, 10, 20);
+    this.camera.position.set(1, 1, 2);
 
     // blue box
     this.box = this.add.box({ y: 2, z: 10 }, { lambert: { color: "deepskyblue" } });
@@ -145,6 +145,35 @@ class MainScene extends Scene3D {
 
     // Load the robot
     loadURDF(this);
+
+
+    // hinge exemple
+    let mat1 = this.add.material({ lambert: { color: 'yellow', transparent: true, opacity: 0.5 } })
+    let mat2 = this.add.material({ lambert: { color: 'blue', transparent: true, opacity: 0.5 } })
+    let mat3 = this.add.material({ lambert: { color: 'green', transparent: true, opacity: 0.5 } })
+
+    const hinge = x => {
+      let box1 = this.physics.add.box({ depth: 0.25, z: 4, y: 0, x: x, mass: 0 }, { custom: mat1 })
+      let box2 = this.physics.add.box({ depth: 0.25, z: 4, y: 0.5, x: x + 1.25 }, { custom: mat2 })
+      let box3 = this.physics.add.box({ depth: 0.25, z: 4, y: 1, x: x + 1.25 }, { custom: mat3 })
+
+      console.log("box", box1)
+      console.log("body", box1.body)
+      this.physics.add.constraints.hinge(box1.body, box2.body, {
+        pivotA: { y: -0.65 },
+        pivotB: { y: 0.65 },
+        axisA: { x: 1 },
+        axisB: { x: 1 }
+      })
+      this.physics.add.constraints.hinge(box2.body, box3.body, {
+        pivotA: { y: -0.65 },
+        pivotB: { y: 0.65 },
+        axisA: { x: 1 },
+        axisB: { x: 1 }
+      })
+    }
+
+    hinge(-2)
     
   }
   
