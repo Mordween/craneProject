@@ -36,8 +36,8 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
     const partJoint = (robotLinks as any)['joints'][dicoPart.joint]
     // console.log(partJoint)
     //console.log(part)
-    //await scene.load.gltf(dicoPart.mesh).then(gltf => {
-      await scene.load.stl(dicoPart.mesh).then(gltf => {
+    await scene.load.gltf(dicoPart.mesh).then(gltf => {
+    // await scene.load.stl(dicoPart.mesh).then(gltf => {
       let object = new ExtendedObject3D()
       const mesh = gltf.scene.children[0]
       
@@ -46,6 +46,7 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
       if(key === 'base')
       {
         object.position.set(basePosition.x, basePosition.y, basePosition.z)
+        object.rotation.set(Math.PI/2, 0, 0)
       }
       else
       {
@@ -57,21 +58,68 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
           }
           else
           {
-            object.position.set(  previousObject.position.x + partJoint.position['x'], 
-                                  previousObject.position.y + partJoint.position['y'], 
-                                  previousObject.position.z + partJoint.position['z'])
+            // object.position.set(  previousObject.position.x + partJoint.position['x'], 
+            //                       previousObject.position.y + partJoint.position['y'], 
+            //                       previousObject.position.z + partJoint.position['z'])
 
-            object.rotation.set(  previousObject.rotation.x + partJoint.rotation['x'],
-                                  previousObject.rotation.y + partJoint.rotation['y'],
-                                  previousObject.rotation.z + partJoint.rotation['z'])
-            // console.log(partJoint.position)
+            // object.rotation.set(  /*previousObject.rotation.x + */partJoint.rotation['x'],
+            //                       /*previousObject.rotation.y + */partJoint.rotation['y'],
+            //                       /*previousObject.rotation.z + */partJoint.rotation['z'])
+            // // console.log(partJoint.position)
           }  
       }
 
-      // if(key ==="link1")
-      //   {
-      //     object.position.set(0,0,basePosition.z + )
-      //   }
+
+      // TODO make it more flexible
+      if(key ==='link1')
+      {
+        object.rotation.set(0, 0, Math.PI)
+        object.position.set(  previousObject.position.x + partJoint.position['x'], 
+                              previousObject.position.y + partJoint.position['y'], 
+                              previousObject.position.z + partJoint.position['z'])
+      }
+      else if( key === 'link2')
+      {
+        object.position.set(  previousObject.position.x + partJoint.position['x'], 
+                              previousObject.position.y + partJoint.position['y'], 
+                              previousObject.position.z + partJoint.position['z'])
+        object.rotation.set(0, -Math.PI/2, 0)
+      }
+      else if( key === 'link3')
+      {
+        object.position.set(  previousObject.position.x + partJoint.position['z'], 
+                              previousObject.position.y + partJoint.position['y'], 
+                              previousObject.position.z + partJoint.position['x'])
+        object.rotation.set(Math.PI, 0, 0)
+      }
+      else if( key === 'link4')
+      {
+        object.position.set(  previousObject.position.x + partJoint.position['x'], 
+                              previousObject.position.y + partJoint.position['z'], 
+                              previousObject.position.z + partJoint.position['y'])
+        object.rotation.set(-Math.PI/2, 0, 0)
+      }
+      else if( key === 'link5')
+      {
+        object.position.set(  previousObject.position.x + partJoint.position['x'], 
+                              previousObject.position.y + partJoint.position['z'], 
+                              previousObject.position.z + partJoint.position['y'])
+      }
+      else if( key === 'link6')
+      {
+        object.position.set(  previousObject.position.x + partJoint.position['x'], 
+                              previousObject.position.y + partJoint.position['z'], 
+                              previousObject.position.z - partJoint.position['y'])
+       object.rotation.set(-Math.PI/2, 0, 0)
+      }
+      else if( key === 'link_eef')
+      {
+        object.position.set(  previousObject.position.x + partJoint.position['x'], 
+                              previousObject.position.y + partJoint.position['z'], 
+                              previousObject.position.z - partJoint.position['y'])
+        object.rotation.set(-Math.PI/2, 0, 0)
+      }
+        
        
       object.add(mesh)
 
@@ -79,27 +127,27 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
       scene.add.existing(object)
       const objectMass = key ==='base' ? 0 : 1      // base of the robot is not affected by gravity
 
-      // scene.physics.add.existing(object, { shape: 'mesh', mass : /*objectMass*/0 })
+      scene.physics.add.existing(object, { shape: 'mesh', mass : /*objectMass*/0 })    // mass = 0 => kinematics mesh
 
-      // if(key !== 'base' /*&& key ==='link1'*/)
-      // {
-      //   scene.physics.add.constraints.hinge(previousObject.body, object.body, 
-      //   {
-      //     pivotA: { x: partJoint.position['x'],
-      //               y: partJoint.position['y'],
-      //               z: partJoint.position['z']},
-      //     pivotB: { x: -partJoint.position['x'],
-      //               y: -partJoint.position['y'],
-      //               z: -partJoint.position['z']},
+      if(key !== 'base' /*&& key ==='link1'*/)
+      {
+        scene.physics.add.constraints.hinge(previousObject.body, object.body, 
+        {
+          pivotA: { x: partJoint.position['x'],
+                    y: partJoint.position['y'],
+                    z: partJoint.position['z']},
+          pivotB: { x: -partJoint.position['x'],
+                    y: -partJoint.position['y'],
+                    z: -partJoint.position['z']},
 
-      //     axisA:  { x: partJoint.axis['x'],
-      //               y: partJoint.axis['y'],
-      //               z: partJoint.axis['z']},
-      //     axisB:  { x: partJoint.axis['x'],
-      //               y: partJoint.axis['y'],
-      //               z: partJoint.axis['z']},
-      //   });
-      // }
+          axisA:  { x: partJoint.axis['x'],
+                    y: partJoint.axis['y'],
+                    z: partJoint.axis['z']},
+          axisB:  { x: partJoint.axis['x'],
+                    y: partJoint.axis['y'],
+                    z: partJoint.axis['z']},
+        });
+      }
       
       previousObject = object
 
