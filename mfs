@@ -1,0 +1,59 @@
+[33mcommit f3a3b0c0b96f641f9d46517129bffde2af340b12[m[33m ([m[1;36mHEAD -> [m[1;32murdfLoaderModified[m[33m)[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Fri Apr 26 10:03:21 2024 +0200
+
+    start creating the joints
+
+[33mcommit f628e937b5e8c95fdcb02befb747d083c01a428e[m[33m ([m[1;31morigin/urdfLoaderModified[m[33m, [m[1;31morigin/robotCollision[m[33m, [m[1;32mrobotCollision[m[33m)[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Thu Apr 25 16:29:20 2024 +0200
+
+    add glb loader
+
+[33mcommit 6ec58b5827efca5e526d27022a9185cef3ec3bca[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Thu Apr 25 15:53:32 2024 +0200
+
+    add glb file in urdf loader
+
+[33mcommit f3bdac57f6a1dae1c6f21365651f06d7c92e70ca[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Wed Apr 24 16:42:22 2024 +0200
+
+    readme change
+
+[33mcommit f28fd2548adac9fd10a4bbe11077c25d47b4eeac[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Wed Apr 24 16:39:19 2024 +0200
+
+    readme change
+
+[33mcommit 0e9679929461b574ac6f1fdccc41cea00f3198e1[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Wed Apr 24 16:36:34 2024 +0200
+
+    add lite6
+
+[33mcommit fb9034776da7c0cf8c9ac7f37e145c34bcfa92d5[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Wed Apr 24 16:11:38 2024 +0200
+
+    Z axis bug fixes
+
+[33mcommit d36d270152a7735f70f953acd178e24b98c6df1f[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Wed Apr 24 15:53:43 2024 +0200
+
+    z up available
+
+[33mcommit 55cf09d391a4c7f1a441fbc292811e53926decbf[m[33m ([m[1;31morigin/bugBranch[m[33m, [m[1;32mbugBranch[m[33m)[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Wed Apr 24 12:42:47 2024 +0200
+
+    gravity always on Y axis
+
+[33mcommit dc7ca9511d142072d70196f8c88bf5d959114815[m
+Author: Mordween <al.ridolfi@laposte.net>
+Date:   Fri Apr 19 14:17:57 2024 +0200
+
+    bare metal
