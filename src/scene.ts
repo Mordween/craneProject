@@ -12,43 +12,43 @@ const robotLoader = new URDFLoader( robotManager );
 const robotData: RobotDictionary = {
   "base": {
     "joint" : NaN.toString(),
-    "mesh": "src/meshes/base.glb",
+    "mesh": "public/ufactory_description/lite6/meshesSTLmodified/visual/base.stl",
     "t": [0, 0, 0],
     "q": [0, 0, 0, 1]
   },
   "link1": {
     "joint" : "joint1",
-    "mesh": "src/meshes/link1.glb",
+    "mesh": "public/ufactory_description/lite6/meshesSTLmodified/visual/link1.stl",
     "t": [0.0, 0.0, 0.2435],
     "q": [0.0, 0.0, 0.0, 1.0]
   },
   "link2": {
     "joint" : "joint2",
-    "mesh": "src/meshes/link2.glb",
+    "mesh": "public/ufactory_description/lite6/meshesSTLmodified/visual/link2.stl",
     "t": [0.0, 0.0, 0.2435],
     "q": [-0.4999981410979567, -0.5000018143028963, -0.4999963044921138, 0.5000036954879761]
   },
   "link3": {
     "joint" : "joint3",
-    "mesh": "src/meshes/link3.glb",
+    "mesh": "public/ufactory_description/lite6/meshesSTLmodified/visual/link3.stl",
     "t": [7.353756616701401e-07, 5.402371266756581e-12, 0.4436999999986494],
     "q": [0.7071041706433439, 6.493365701876792e-06, 1.2986979459196817e-06, 0.7071093916893005]
   },
   "link4": {
     "joint" : "joint4",
-    "mesh": "src/meshes/link4.glb",
+    "mesh": "public/ufactory_description/lite6/meshesSTLmodified/visual/link4.stl",
     "t": [0.08699906327003075, -7.134198477910336e-07, 0.21608936087324546],
     "q": [1.0, 5.5098144010580686e-06, -3.673194983895874e-06, 1.8366160440284816e-06]
   },
   "link5": {
     "joint" : "joint5",
-    "mesh": "src/meshes/link5.glb",
+    "mesh": "public/ufactory_description/lite6/meshesSTLmodified/visual/link5.stl",
     "t": [0.08699906327003075, -7.134198477910336e-07, 0.21608936087324546],
     "q": [-0.7071067932571579, -1.2986741408059922e-06, 6.493370704012438e-06, 0.7071067690849304]
   },
   "link6": {
     "joint" : "joint6",
-    "mesh": "src/meshes/link6.glb",
+    "mesh": "public/ufactory_description/lite6/meshesSTLmodified/visual/link6.stl",
     "t": [0.08699860411939285, -7.134240641771995e-07, 0.15358936087493202],
     "q": [1.0, 5.509814401058069e-06, -3.6731949838958737e-06, 1.8366160440284816e-06]
   },

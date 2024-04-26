@@ -36,7 +36,8 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
     const partJoint = (robotLinks as any)['joints'][dicoPart.joint]
     // console.log(partJoint)
     //console.log(part)
-    await scene.load.gltf(dicoPart.mesh).then(gltf => {
+    //await scene.load.gltf(dicoPart.mesh).then(gltf => {
+      await scene.load.stl(dicoPart.mesh).then(gltf => {
       let object = new ExtendedObject3D()
       const mesh = gltf.scene.children[0]
       
@@ -59,6 +60,10 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
             object.position.set(  previousObject.position.x + partJoint.position['x'], 
                                   previousObject.position.y + partJoint.position['y'], 
                                   previousObject.position.z + partJoint.position['z'])
+
+            object.rotation.set(  previousObject.rotation.x + partJoint.rotation['x'],
+                                  previousObject.rotation.y + partJoint.rotation['y'],
+                                  previousObject.rotation.z + partJoint.rotation['z'])
             // console.log(partJoint.position)
           }  
       }
@@ -74,16 +79,25 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
       scene.add.existing(object)
       const objectMass = key ==='base' ? 0 : 1      // base of the robot is not affected by gravity
 
-      // scene.physics.add.existing(object, { shape: 'mesh', mass : objectMass })
+      // scene.physics.add.existing(object, { shape: 'mesh', mass : /*objectMass*/0 })
 
-      // if(key !== 'base' && key ==='link1')
+      // if(key !== 'base' /*&& key ==='link1'*/)
       // {
       //   scene.physics.add.constraints.hinge(previousObject.body, object.body, 
       //   {
-      //     pivotA: {z: 0 },
-      //     pivotB: {z: 0 },
-      //     axisA: { z: 1},
-      //     axisB: { z: 1}
+      //     pivotA: { x: partJoint.position['x'],
+      //               y: partJoint.position['y'],
+      //               z: partJoint.position['z']},
+      //     pivotB: { x: -partJoint.position['x'],
+      //               y: -partJoint.position['y'],
+      //               z: -partJoint.position['z']},
+
+      //     axisA:  { x: partJoint.axis['x'],
+      //               y: partJoint.axis['y'],
+      //               z: partJoint.axis['z']},
+      //     axisB:  { x: partJoint.axis['x'],
+      //               y: partJoint.axis['y'],
+      //               z: partJoint.axis['z']},
       //   });
       // }
       
