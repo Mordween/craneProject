@@ -28,7 +28,7 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
   // });
 
   let previousObject;
-  const basePosition = {x:0, y:0, z:0.68}
+  const basePosition = {x:0, y:0, z:0.63}
   for (const key in robotData) {
     
     const dicoPart = robotData[key];

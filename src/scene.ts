@@ -60,6 +60,35 @@ const robotData: RobotDictionary = {
   },
 };
 
+function extractObjectNameFromUrl(url: string): string {
+
+  const parts = url.split('/');
+  let objectName = parts[parts.length - 1];
+  objectName = objectName.split('.')[0]         // split extension
+  return objectName;
+}
+
+function loadGLBFile(scene: Scene3D, url: string, position: {x: number, y: number, z: number}, fixed: boolean, scale : number = 1)
+{
+  scene.load.gltf(url).then(gltf => {
+
+    let object = new ExtendedObject3D()
+    const mesh = gltf.scene.children[0]
+    object.add(mesh)
+    object.position.set(position.x, position.y, position.z)
+
+    object.scale.setX(scale); object.scale.setY(scale); object.scale.setZ(scale);
+
+    object.name = extractObjectNameFromUrl(url);
+    console.log(object)
+
+    scene.add.existing(object)
+
+    const objectMass = fixed === true ? 0 : 1      // base of the robot is not affected by gravity
+
+    scene.physics.add.existing(object, { shape: 'mesh', mass : objectMass})    // mass = 0 => kinematics mesh
+  });
+}
 function loadURDF(scene: Scene3D)
 {
     robotLoader.packages = {
@@ -72,25 +101,6 @@ function loadURDF(scene: Scene3D)
         console.log(robot);
 
         loadRobot(robotData, robot, scene);
-    
-        // The robot is loaded!
-        
-        // scene.add.existing(robot)
-
-        // scene.physics.add.existing(robot, { shape: 'mesh' })
-
-        scene.load.gltf('urdfObjects/table.glb').then(gltf => {
-          // await scene.load.stl(dicoPart.mesh).then(gltf => {
-          let object = new ExtendedObject3D()
-          const mesh = gltf.scene.children[0]
-          object.add(mesh)
-
-          object.name = 'table';
-          console.log('table', object)
-          scene.add.existing(object)
-
-          scene.physics.add.existing(object, { shape: 'mesh', mass : /*objectMass*/0 })    // mass = 0 => kinematics mesh
-        });
     
       }
     );
@@ -146,60 +156,17 @@ class MainScene extends Scene3D {
     // position camera
     this.camera.position.set(1, 1, 2);
 
-    // blue box
-    this.box = this.add.box({ y: 2, z: 10 }, { lambert: { color: "deepskyblue" } });
-
-    // pink box
-    this.physics.add.box({ y: 5, z:5 }, { lambert: { color: "hotpink" } });
-
-    // green sphere
-    const geometry = new THREE.SphereGeometry(0.8, 16, 16);
-    const spherematerial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, spherematerial);
-    cube.position.set(0.2, 3, 0);
-    this.scene.add(cube);
-    // add physics to an existing object
-    //@ts-ignore
-    this.physics.add.existing(cube);
-
     // Load the robot
     loadURDF(this);
-
-
-    // hinge exemple
-    let mat1 = this.add.material({ lambert: { color: 'yellow', transparent: true, opacity: 0.5 } })
-    let mat2 = this.add.material({ lambert: { color: 'blue', transparent: true, opacity: 0.5 } })
-    let mat3 = this.add.material({ lambert: { color: 'green', transparent: true, opacity: 0.5 } })
-
-    const hinge = x => {
-      let box1 = this.physics.add.box({ depth: 0.25, z: 4, y: 0, x: x, mass: 0 }, { custom: mat1 })
-      let box2 = this.physics.add.box({ depth: 0.25, z: 4, y: 0.5, x: x + 1.25 }, { custom: mat2 })
-      let box3 = this.physics.add.box({ depth: 0.25, z: 4, y: 1, x: x + 1.25 }, { custom: mat3 })
-
-      console.log("box", box1)
-      console.log("body", box1.body)
-      this.physics.add.constraints.hinge(box1.body, box2.body, {
-        pivotA: { y: -0.65 },
-        pivotB: { y: 0.65 },
-        axisA: { x: 1 },
-        axisB: { x: 1 }
-      })
-      this.physics.add.constraints.hinge(box2.body, box3.body, {
-        pivotA: { y: -0.65 },
-        pivotB: { y: 0.65 },
-        axisA: { x: 1 },
-        axisB: { x: 1 }
-      })
-    }
-
-    hinge(-2)
     
+    loadGLBFile(this, 'urdfObjects/table.glb', {x: 0, y: 0, z: 0}, true)
+    loadGLBFile(this, 'urdfObjects/duck.glb', {x: 0, y: 0, z: 1.5}, false, 0.05)
+
   }
   
 
   update() {
-    this.box.rotation.x += 0.01;
-    this.box.rotation.y += 0.01;
+    
   }
 }
 
