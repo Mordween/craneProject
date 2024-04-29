@@ -129,30 +129,29 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
 
       scene.physics.add.existing(object, { shape: 'mesh', mass : /*objectMass*/0 })    // mass = 0 => kinematics mesh
 
-      if(key !== 'base' /*&& key ==='link1'*/)
-      {
-        scene.physics.add.constraints.hinge(previousObject.body, object.body, 
-        {
-          pivotA: { x: partJoint.position['x'],
-                    y: partJoint.position['y'],
-                    z: partJoint.position['z']},
-          pivotB: { x: -partJoint.position['x'],
-                    y: -partJoint.position['y'],
-                    z: -partJoint.position['z']},
+      // // Joints creation
+      // if(key !== 'base' /*&& key ==='link1'*/)
+      // {
+      //   scene.physics.add.constraints.hinge(previousObject.body, object.body, 
+      //   {
+      //     pivotA: { x: partJoint.position['x'],
+      //               y: partJoint.position['y'],
+      //               z: partJoint.position['z']},
+      //     pivotB: { x: -partJoint.position['x'],
+      //               y: -partJoint.position['y'],
+      //               z: -partJoint.position['z']},
 
-          axisA:  { x: partJoint.axis['x'],
-                    y: partJoint.axis['y'],
-                    z: partJoint.axis['z']},
-          axisB:  { x: partJoint.axis['x'],
-                    y: partJoint.axis['y'],
-                    z: partJoint.axis['z']},
-        });
-      }
+      //     axisA:  { x: partJoint.axis['x'],
+      //               y: partJoint.axis['y'],
+      //               z: partJoint.axis['z']},
+      //     axisB:  { x: partJoint.axis['x'],
+      //               y: partJoint.axis['y'],
+      //               z: partJoint.axis['z']},
+      //   });
+      // }
       
       previousObject = object
-
-
-      // TODO disable collision between children and parent links 
+      
     });
 }
 }

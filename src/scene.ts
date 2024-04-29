@@ -1,8 +1,11 @@
 import { Project, Scene3D, PhysicsLoader, THREE, ExtendedObject3D } from "enable3d";
+
 import { loadRobot, RobotDictionary } from "./robots.ts";
 
 import URDFLoader from 'urdf-loader';
 import { LoadingManager } from 'three';
+
+import { LumaSplatsThree, LumaSplatsSemantics } from "@lumaai/luma-web";
 
 const robotManager = new LoadingManager();
 const robotLoader = new URDFLoader( robotManager );
@@ -116,7 +119,9 @@ class MainScene extends Scene3D {
   init() {
     console.log("Init");
     this.renderer.setPixelRatio(1);
+    this.renderer.domElement.style.position = 'absolute';
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(this.renderer.domElement)
   }
 
   preload() {
@@ -148,7 +153,7 @@ class MainScene extends Scene3D {
     resize();
 
     // set up scene (light, ground, grid, sky, orbitControls)
-    this.warpSpeed("light", "camera", "lookAtCenter", "grid", "ground",  "orbitControls", "fog", "sky");  
+    this.warpSpeed("light", "camera", "lookAtCenter", "grid", /*"ground",*/  "orbitControls", "fog", "sky");  // deactivate the ground  
 
     // enable physics debug
     this.physics.debug?.enable();
@@ -160,7 +165,37 @@ class MainScene extends Scene3D {
     loadURDF(this);
     
     loadGLBFile(this, 'urdfObjects/table.glb', {x: 0, y: 0, z: 0}, true)
-    loadGLBFile(this, 'urdfObjects/duck.glb', {x: 0, y: 0, z: 1.5}, false, 0.05)
+    loadGLBFile(this, 'urdfObjects/duck.glb', {x: 0, y: 0, z: 1.5}, true, 0.05)
+
+    let splats = new LumaSplatsThree({
+      source: 'https://lumalabs.ai/capture/ca9ea966-ca24-4ec1-ab0f-af665cb546ff',
+      // controls the particle entrance animation
+      particleRevealEnabled: true,
+    });
+    console.log("splats", splats)
+    splats.rotateX(Math.PI/2)   // Z up
+    splats.position.setX(1.5); splats.position.setY(1); splats.position.setZ(1.5);  
+    this.scene.add(splats);
+
+    splats.semanticsMask = LumaSplatsSemantics.BACKGROUND;
+
+    function frameLoop(this) {
+			let canvas = this.renderer.domElement;
+			let width = canvas.clientWidth;
+			let height = canvas.clientHeight;
+
+			if (canvas.width !== width || canvas.height !== height) {
+				this.camera.aspect = width / height;
+				this.camera.updateProjectionMatrix();
+				this.renderer.setSize(width, height, false);
+			}
+
+			this.orbitControls.update();
+
+			this.renderer.render(this.scene, this.camera);
+		}
+
+		this.renderer.setAnimationLoop(frameLoop);
 
   }
   
