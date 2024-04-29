@@ -75,9 +75,22 @@ function loadURDF(scene: Scene3D)
     
         // The robot is loaded!
         
-        scene.add.existing(robot)
+        // scene.add.existing(robot)
 
         // scene.physics.add.existing(robot, { shape: 'mesh' })
+
+        scene.load.gltf('urdfObjects/table.glb').then(gltf => {
+          // await scene.load.stl(dicoPart.mesh).then(gltf => {
+          let object = new ExtendedObject3D()
+          const mesh = gltf.scene.children[0]
+          object.add(mesh)
+
+          object.name = 'table';
+          console.log('table', object)
+          scene.add.existing(object)
+
+          scene.physics.add.existing(object, { shape: 'mesh', mass : /*objectMass*/0 })    // mass = 0 => kinematics mesh
+        });
     
       }
     );
