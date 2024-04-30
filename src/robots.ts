@@ -17,27 +17,14 @@ export interface RobotDictionary {
 // // Function to load a robot into a scene
 export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, scene: Scene3D) {
 
-  // scene.load.gltf("src/meshes/link1.glb").then(stl => {
-  //   let object = new ExtendedObject3D()
-  //   const mesh = stl.scene.children[0]
-  //   object.add(mesh)
-
-  //   console.log("link1",object)
-  //   scene.add.existing(object)
-
-  // });
-
   let previousObject;
   const basePosition = {x:0, y:0, z:0.63}
   for (const key in robotData) {
     
     const dicoPart = robotData[key];
-    const partLink = (robotLinks as any)['links'][key];
-    const partJoint = (robotLinks as any)['joints'][dicoPart.joint]
-    // console.log(partJoint)
-    //console.log(part)
+    const partJoint = (robotLinks as any)['joints'][dicoPart.joint];
+    
     await scene.load.gltf(dicoPart.mesh).then(gltf => {
-    // await scene.load.stl(dicoPart.mesh).then(gltf => {
       let object = new ExtendedObject3D()
       const mesh = gltf.scene.children[0]
       
@@ -50,7 +37,6 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
       }
       else
       {
-        object.quaternion.set(partLink.quaternion['_x'], partLink.quaternion['_y'], partLink.quaternion['_z'], partLink.quaternion['_w'])
         if(Number.isNaN(dicoPart.joint) || dicoPart.joint === 'NaN')
           {
             object.position.set(0,0,0);
@@ -73,10 +59,10 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
       // TODO make it more flexible
       if(key ==='link1')
       {
-        object.rotation.set(0, 0, Math.PI)
         object.position.set(  previousObject.position.x + partJoint.position['x'], 
                               previousObject.position.y + partJoint.position['y'], 
                               previousObject.position.z + partJoint.position['z'])
+        object.rotation.set(0, 0, Math.PI)
       }
       else if( key === 'link2')
       {
@@ -127,31 +113,10 @@ export async function loadRobot(robotData: RobotDictionary, robotLinks: Object, 
       scene.add.existing(object)
       const objectMass = key ==='base' ? 0 : 1      // base of the robot is not affected by gravity
 
-      scene.physics.add.existing(object, { shape: 'mesh', mass : /*objectMass*/0 })    // mass = 0 => kinematics mesh
-
-      // // Joints creation
-      // if(key !== 'base' /*&& key ==='link1'*/)
-      // {
-      //   scene.physics.add.constraints.hinge(previousObject.body, object.body, 
-      //   {
-      //     pivotA: { x: partJoint.position['x'],
-      //               y: partJoint.position['y'],
-      //               z: partJoint.position['z']},
-      //     pivotB: { x: -partJoint.position['x'],
-      //               y: -partJoint.position['y'],
-      //               z: -partJoint.position['z']},
-
-      //     axisA:  { x: partJoint.axis['x'],
-      //               y: partJoint.axis['y'],
-      //               z: partJoint.axis['z']},
-      //     axisB:  { x: partJoint.axis['x'],
-      //               y: partJoint.axis['y'],
-      //               z: partJoint.axis['z']},
-      //   });
-      // }
+      scene.physics.add.existing(object, { shape: 'mesh', mass : /*objectMass*/0 }  )    // mass = 0 => kinematics mesh
       
       previousObject = object
-      
+
     });
 }
 }

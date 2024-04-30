@@ -134,9 +134,10 @@ class MainScene extends Scene3D {
 
     console.log("create");
 
-    const axesHelper = new THREE.AxesHelper( 5 );
-    axesHelper.setColors(new THREE.Color(255, 0, 0), new THREE.Color(0, 255, 0), new THREE.Color(0, 0, 255))    // in order to know which axis is the right axis
-    this.scene.add( axesHelper );
+    // // world axis 
+    // const axesHelper = new THREE.AxesHelper( 5 );
+    // axesHelper.setColors(new THREE.Color(255, 0, 0), new THREE.Color(0, 255, 0), new THREE.Color(0, 0, 255))    // in order to know which axis is the right axis
+    // this.scene.add( axesHelper );
 
     // Resize window.
     const resize = () => {
@@ -156,7 +157,7 @@ class MainScene extends Scene3D {
     this.warpSpeed("light", "camera", "lookAtCenter", "grid", /*"ground",*/  "orbitControls", "fog", "sky");  // deactivate the ground  
 
     // enable physics debug
-    this.physics.debug?.enable();
+    // this.physics.debug?.enable();
 
     // position camera
     this.camera.position.set(1, 1, 2);
@@ -165,19 +166,25 @@ class MainScene extends Scene3D {
     loadURDF(this);
     
     loadGLBFile(this, 'urdfObjects/table.glb', {x: 0, y: 0, z: 0}, true)
-    loadGLBFile(this, 'urdfObjects/duck.glb', {x: 0, y: 0, z: 1.5}, true, 0.05)
+    // loadGLBFile(this, 'urdfObjects/duck.glb', {x: 0, y: 0, z: 1.5}, false, 0.05)
+    // loadGLBFile(this, 'urdfObjects/Test3_textured_mesh_glb.glb', {x: 0, y: 0, z: 2}, true, 0.4)
+
+    // pink box
+    // this.physics.add.box({ depth: 0.1, width : 0.2, height: 0.1, z: 2 }, { lambert: { color: "hotpink" } });
 
     let splats = new LumaSplatsThree({
-      source: 'https://lumalabs.ai/capture/ca9ea966-ca24-4ec1-ab0f-af665cb546ff',
+      // source: 'https://lumalabs.ai/capture/ca9ea966-ca24-4ec1-ab0f-af665cb546ff',
+      source : 'https://lumalabs.ai/capture/fb5e9a17-5e68-4448-8da9-e77991ecf1ec',
+      // source : 'https://lumalabs.ai/embed/e759d47b-cf0d-4164-90b2-61cc8a8c5b1b?mode=sparkles&background=%23fafafa&color=%23000000&showTitle=true&loadBg=true&logoPosition=bottom-left&infoPosition=bottom-right&cinematicVideo=undefined&showMenu=false',
       // controls the particle entrance animation
       particleRevealEnabled: true,
     });
     console.log("splats", splats)
     splats.rotateX(Math.PI/2)   // Z up
     splats.position.setX(1.5); splats.position.setY(1); splats.position.setZ(1.5);  
-    this.scene.add(splats);
+    // this.scene.add(splats);
 
-    splats.semanticsMask = LumaSplatsSemantics.BACKGROUND;
+    splats.semanticsMask = LumaSplatsSemantics.BACKGROUND | LumaSplatsSemantics.FOREGROUND
 
     function frameLoop(this) {
 			let canvas = this.renderer.domElement;
@@ -207,5 +214,5 @@ class MainScene extends Scene3D {
 
 PhysicsLoader(
   "lib/ammo/kripken",
-  () => new Project({ scenes: [MainScene], antialias: true })
+  () => new Project({ gravity: { x: 0, y: 0, z: -9.81 }, scenes: [MainScene], antialias: true })
 );
