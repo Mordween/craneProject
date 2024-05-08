@@ -8,16 +8,23 @@
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>SoftBody Cloth</title>
-    <link rel="stylesheet" href="/css/examples.css?ver=1.0.0" />
-    <script src="/js/examples.js?ver=1.1.1"></script>
-    <script src="/lib/enable3d/enable3d.framework.0.25.4.min.js"></script>
+    <link rel="stylesheet" href="../css/examples.css?ver=1.0.0" />
+    <script src="../js/examples.js?ver=1.1.1"></script>
+    <script src="../lib/enable3d/enable3d.framework.0.25.4.min.js"></script>
   </head>
 
   <body>
     <script>
       const { Project, Scene3D, PhysicsLoader, THREE } = ENABLE3D
 
+      var logged = false;
+
       class MainScene extends Scene3D {
+        // async softBodiesMaker()
+        // {
+          
+        // }
+
         async create() {
           const { orbitControls } = await this.warpSpeed()
           this.camera.position.set(5, 5, 10)
@@ -37,15 +44,20 @@
 
           // The cloth
           // Cloth graphic object
-          const clothWidth = 4
+          // const clothWidth = 4
+          // const clothHeight = 3
+          const clothWidth = 0.01
           const clothHeight = 3
-          const clothNumSegmentsZ = clothWidth * 5
-          const clothNumSegmentsY = clothHeight * 5
-          const clothPos = new THREE.Vector3(0, 2, 2)
+          // const clothNumSegmentsZ = clothWidth * 5
+          // const clothNumSegmentsY = clothHeight * 5
+
+          const clothNumSegmentsZ = 1
+          const clothNumSegmentsY = 10
+          const clothPos = new THREE.Vector3(0, 2, 0)
 
           const clothGeometry = new THREE.PlaneGeometry(clothWidth, clothHeight, clothNumSegmentsZ, clothNumSegmentsY)
           clothGeometry.rotateY(Math.PI * 0.5)
-          clothGeometry.translate(clothPos.x, clothPos.y + clothHeight * 0.5, clothPos.z - clothWidth * 0.5)
+          // clothGeometry.translate(clothPos.x, clothPos.y + clothHeight * 0.5, clothPos.z - clothWidth * 0.5)
 
           const clothMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide })
           this.cloth = new THREE.Mesh(clothGeometry, clothMaterial)
@@ -88,14 +100,80 @@
           // @ts-ignore
           Ammo.castObject(clothSoftBody, Ammo.btCollisionObject).getCollisionShape().setMargin(0.04)
           this.physics.physicsWorld.addSoftBody(clothSoftBody, 1, -1)
+
+
+          console.log("this", this)
+
+
           this.cloth.userData.physicsBody = clothSoftBody
           // Disable deactivation
           clothSoftBody.setActivationState(4)
 
+
+
+
+
+          // Rope graphic object
+        const ropeNumSegments = 10;
+        const ropeLength = -4.5;
+        const ropeMass = 3;
+        const ropePos = {x:0, y:5, z:0.5}
+        
+
+        const segmentLength = ropeLength / ropeNumSegments;
+        const ropeGeometry = new THREE.BufferGeometry();
+        const ropeMaterial = new THREE.LineBasicMaterial( { color: 0x000000 } );
+        const ropePositions = [];
+        const ropeIndices = [];
+
+        for ( let i = 0; i < ropeNumSegments + 1; i ++ ) {
+
+            ropePositions.push( ropePos.x, ropePos.y + i * segmentLength, ropePos.z );
+
+        }
+
+        for ( let i = 0; i < ropeNumSegments; i ++ ) {
+
+            ropeIndices.push( i, i + 1 );
+
+        }
+
+        ropeGeometry.setIndex( new THREE.BufferAttribute( new Uint16Array( ropeIndices ), 1 ) );
+        ropeGeometry.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array( ropePositions ), 3 ) );
+        ropeGeometry.computeBoundingSphere();
+        this.rope = new THREE.LineSegments( ropeGeometry, ropeMaterial );
+        this.rope.castShadow = true;
+        this.rope.receiveShadow = true;
+        this.scene.add( this.rope );
+
+        let transformAux1 = new Ammo.btTransform();
+
+        // Rope physic object
+        const ropeStart = new Ammo.btVector3( ropePos.x, ropePos.y, ropePos.z );
+        const ropeEnd = new Ammo.btVector3( ropePos.x, ropePos.y , ropePos.z );
+
+        const ropeSoftBody = softBodyHelpers.CreateRope(this.physics.physicsWorld.getWorldInfo(), ropeStart, ropeEnd, ropeNumSegments - 1, 0 );
+
+        const sbConfigRope = ropeSoftBody.get_m_cfg()
+        sbConfigRope.set_viterations(10)
+        sbConfigRope.set_piterations(10)
+
+        ropeSoftBody.setTotalMass(ropeMass, false)
+        // @ts-ignore
+        // Ammo.castObject(ropeSoftBody, Ammo.btCollisionObject).getCollisionShape().setMargin(margin * 3)
+        this.physics.physicsWorld.addSoftBody(ropeSoftBody, 1, -1)
+        this.rope.userData.physicsBody = ropeSoftBody
+        // Disable deactivation
+        ropeSoftBody.setActivationState(4)
+
+
+
+
           // Glue the cloth to the bar
           const influence = 0.5
           clothSoftBody.appendAnchor(0, bar.body.ammo, false, influence)
-          clothSoftBody.appendAnchor(clothNumSegmentsZ, bar.body.ammo, false, influence)
+          ropeSoftBody.appendAnchor(ropeNumSegments, bar.body.ammo, false, influence)
+          // clothSoftBody.appendAnchor(clothNumSegmentsZ-10, bar.body.ammo, false, influence)
         }
 
         update(time) {
@@ -108,6 +186,15 @@
           // @ts-ignore
           const clothPositions = this.cloth.geometry.attributes.position.array
           const numVerts = clothPositions.length / 3
+          
+
+            /*In your function*/
+            if(!logged)
+            {
+                console.log("vert?", numVerts)
+                logged = true;
+            }
+
           const nodes = softBody.get_m_nodes()
           let indexFloat = 0
 
@@ -127,7 +214,7 @@
         }
       }
 
-      PhysicsLoader('/lib/ammo/kripken', () => new Project({ scenes: [MainScene], softBodies: true }))
+      PhysicsLoader('../lib/ammo/kripken', () => new Project({ scenes: [MainScene], softBodies: true }))
     </script>
   </body>
 </html>

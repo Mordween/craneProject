@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>SoftBody rope</title>
+    <link rel="stylesheet" href="../css/examples.css?ver=1.0.0" />
+    <script src="../js/examples.js?ver=1.1.1"></script>
+    <script src="../lib/enable3d/enable3d.framework.0.25.4.min.js"></script>
+  </head>
+
+  <body>
+    <script>
+      const { Project, Scene3D, PhysicsLoader, THREE } = ENABLE3D
+
+      class MainScene extends Scene3D {
+
+        async create() {
+            const pos = new THREE.Vector3();
+            const quat = new THREE.Quaternion();
+
+          const { orbitControls } = await this.warpSpeed()
+
+          this.camera.position.set(5, 5, 10)
+          orbitControls?.target.set(0, 2.5, 0)
+          this.camera.lookAt(0, 2.5, 0)
+
+          // enable physics debugging
+          this.physics.debug?.enable()
+
+          // world axis 
+        const axesHelper = new THREE.AxesHelper( 5 );
+        axesHelper.setColors(new THREE.Color(255, 0, 0), new THREE.Color(0, 255, 0), new THREE.Color(0, 0, 255))    // in order to know which axis is the right axis
+        this.scene.add( axesHelper );
+
+
+        // The rope
+        const ropeWidth = 0.001
+        const ropeHeight = 4
+        const cylinderRadius = 0.3
+
+
+          // ball
+          this.ball = this.physics.add.sphere({ x: 5, z: 2, collisionFlags: 2 })
+
+          // Ball  2
+        const ballMass = 1.2;
+        const ballRadius = 0.6;
+        pos.set( -cylinderRadius, 0, ropeHeight-ballRadius );
+        quat.set( 0, 0, 0, 1 );
+
+        this.ball2 = this.physics.add.sphere({x:pos.x, y:pos.y, z:pos.z, radius:ballRadius })
+        this.ball2.castShadow = true;
+        this.ball2.receiveShadow = true;
+
+          // bar
+          this.bar = this.add.cylinder({ z: 8, height: 5, radiusTop: cylinderRadius, radiusBottom: cylinderRadius })
+          this.physics.add.existing(this.bar, { collisionFlags: 2, mass: 155 })
+
+          // bar
+          this.bar2 = this.add.cylinder({ z: 6, height: 15, radiusTop: 0.1, radiusBottom: 0.1 })
+          this.physics.add.existing(this.bar2, { collisionFlags: 2, mass: 150 })
+
+          const ropeNumSegmentsZ = 1
+          const ropeNumSegmentsY = 50
+          const ropePos = new THREE.Vector3(-cylinderRadius, 0, 4)
+
+          const ropeGeometry = new THREE.PlaneGeometry(ropeWidth, ropeHeight, ropeNumSegmentsZ, ropeNumSegmentsY)
+          // ropeGeometry.rotateY(Math.PI * 0.5)
+          // ropeGeometry.translate(ropePos.x, ropePos.y + ropeHeight * 0.5, ropePos.z - ropeWidth * 0.5)
+
+          const ropeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide })
+          this.rope = new THREE.Mesh(ropeGeometry, ropeMaterial)
+          this.rope.castShadow = true
+          this.rope.receiveShadow = true
+          this.scene.add(this.rope)
+
+          this.load.texture('/assets/img/grid.png').then(texture => {
+            texture.wrapS = THREE.RepeatWrapping
+            texture.wrapT = THREE.RepeatWrapping
+            texture.repeat.set(ropeNumSegmentsZ, ropeNumSegmentsY)
+            // @ts-ignore
+            this.rope.material.map = texture
+            // @ts-ignore
+            this.rope.material.needsUpdate = true
+          })
+
+          // rope physic object
+          const softBodyHelpers = new Ammo.btSoftBodyHelpers()
+          const ropeCorner00 = new Ammo.btVector3(ropePos.x, ropePos.y , ropePos.z + ropeHeight)
+          const ropeCorner01 = new Ammo.btVector3(ropePos.x, ropePos.y - ropeWidth, ropePos.z + ropeHeight)
+          const ropeCorner10 = new Ammo.btVector3(ropePos.x, ropePos.y, ropePos.z)
+          const ropeCorner11 = new Ammo.btVector3(ropePos.x, ropePos.y, ropePos.z - ropeWidth)
+          const ropeSoftBody = softBodyHelpers.CreatePatch(
+            this.physics.physicsWorld.getWorldInfo(),
+            ropeCorner00,
+            ropeCorner01,
+            ropeCorner10,
+            ropeCorner11,
+            ropeNumSegmentsZ + 1,
+            ropeNumSegmentsY + 1,
+            0,
+            true
+          )
+          const sbConfig = ropeSoftBody.get_m_cfg()
+          sbConfig.set_viterations(10)
+          sbConfig.set_piterations(10)
+
+          ropeSoftBody.setTotalMass(0.9, false)
+          // @ts-ignore
+          Ammo.castObject(ropeSoftBody, Ammo.btCollisionObject).getCollisionShape().setMargin(0.04)
+          this.physics.physicsWorld.addSoftBody(ropeSoftBody, 1, -1)
+
+
+          console.log("this", this)
+
+          this.rope.userData.physicsBody = ropeSoftBody
+          // Disable deactivation
+          ropeSoftBody.setActivationState(4)
+
+
+          // Glue the rope to the bar
+          const influence = 1
+          ropeSoftBody.appendAnchor(ropeNumSegmentsY*2, this.ball2.body.ammo, true, influence)
+          ropeSoftBody.appendAnchor(0, this.bar.body.ammo, true, influence)
+
+          console.log("body", this.rope)//.setFriction(1)
+          // this.rope.geometry.boundingSphere.radius = 0
+          console.log(this.rope.geometry.boundingSphere)
+
+          console.log(this.ball2.position)
+           this.value = 0;
+           console.log(this.bar)
+        }
+
+        update(time) {
+          // update ball
+          this.ball.position.x -= Math.sin(time) * 0.1
+          this.ball.body.needUpdate = true
+
+          this.bar.position.y -= Math.sin(time) * 0.01
+          this.bar.body.needUpdate = true
+
+          this.bar2.position.x -= this.value* 0.001
+          this.bar2.body.needUpdate = true
+
+          this.bar.rotation.set(0, this.value+=0.01,0 )
+
+
+        //   console.log(this.ball2.position)
+        
+            
+          // update rope
+          const softBody = this.rope.userData.physicsBody
+          // @ts-ignore
+          const ropePositions = this.rope.geometry.attributes.position.array
+          const numVerts = ropePositions.length / 3
+
+          const nodes = softBody.get_m_nodes()
+          let indexFloat = 0
+
+          for (let i = 0; i < numVerts; i++) {
+            const node = nodes.at(i)
+            const nodePos = node.get_m_x()
+            ropePositions[indexFloat++] = nodePos.x()
+            ropePositions[indexFloat++] = nodePos.y()
+            ropePositions[indexFloat++] = nodePos.z()
+          }
+
+          this.rope.geometry.computeVertexNormals()
+          // @ts-ignore
+          this.rope.geometry.attributes.position.needsUpdate = true
+          // @ts-ignore
+          this.rope.geometry.attributes.normal.needsUpdate = true
+        }
+      }
+
+      PhysicsLoader('../lib/ammo/kripken', () => new Project({ gravity: { x: 0, y: 0, z: -9.81 }, scenes: [MainScene], softBodies: true }))
+    </script>
+  </body>
+</html>
