@@ -99,32 +99,6 @@
             this.rope.material.needsUpdate = true
           })
 
-          // this.physics.physicsWorld.setGravity({x:0, y:0, z:-9.81})
-
-          // rope physic object
-
-          // const softBodyWorldInfo = new Ammo.btSoftBodyWorldInfo();
-          // console.log("test", softBodyWorldInfo.get_m_gravity())
-          // console.log("test", softBodyWorldInfo.get_m_gravity().x())
-          // console.log("test", softBodyWorldInfo.get_m_gravity().y())
-          // console.log("test", softBodyWorldInfo.get_m_gravity().z())
-
-          // softBodyWorldInfo.get_m_gravity().setX(0)
-          // softBodyWorldInfo.get_m_gravity().setY(0)
-          // softBodyWorldInfo.get_m_gravity().setZ(-9.81)
-
-          // console.log("test", softBodyWorldInfo.get_m_gravity())
-          // console.log("test", softBodyWorldInfo.get_m_gravity().x())
-          // console.log("test", softBodyWorldInfo.get_m_gravity().y())
-          // console.log("test", softBodyWorldInfo.get_m_gravity().z())
-
-          // console.log("meine",softBodyWorldInfo)
-          // console.log("seine",this.physics.physicsWorld.getWorldInfo())
-          // console.log("seine",this.physics.physicsWorld.getWorldInfo().get_m_gravity().x())
-          // console.log("seine",this.physics.physicsWorld.getWorldInfo().get_m_gravity().y())
-          // console.log("seine",this.physics.physicsWorld.getWorldInfo().get_m_gravity().z())
-
-
           console.log("thisPhysics", this.physics.physicsWorld.getWorldInfo())
           this.physics.physicsWorld.getWorldInfo().get_m_gravity().setX(0)
           this.physics.physicsWorld.getWorldInfo().get_m_gravity().setY(0)
@@ -134,8 +108,8 @@
 
           const softBodyHelpers = new Ammo.btSoftBodyHelpers()
           let ropeSoftBody
-          /*********************************** CreateRope used *********************************/
-          if (ropeBodyUse === true)
+          
+          if (ropeBodyUse === true)   /*********************************** CreateRope used *********************************/
           {
             const ropeStart = new Ammo.btVector3( ropePos.x, ropePos.y, ropePos.z );
             const ropeEnd = new Ammo.btVector3( ropePos.x, ropePos.y , ropePos.z + ropeHeight );
@@ -148,8 +122,7 @@
             0 
             );
           }
-          else
-          /*********************************** CreatePatch used *********************************/
+          else                      /*********************************** CreatePatch used *********************************/
           {
             const ropeCorner00 = new Ammo.btVector3(ropePos.x, ropePos.y , ropePos.z + ropeHeight)
             const ropeCorner01 = new Ammo.btVector3(ropePos.x, ropePos.y - ropeWidth, ropePos.z + ropeHeight)
@@ -189,14 +162,12 @@
           // Glue the rope to the bar
           const influence = 2
 
-          if(ropeBodyUse == true)
-          /*********************************** if CreateRope used *********************************/
+          if(ropeBodyUse == true) /*********************************** if CreateRope used *********************************/
           {
             ropeSoftBody.appendAnchor(0, this.ball2.body.ammo, true, influence)
             ropeSoftBody.appendAnchor(ropeNumSegmentsY, this.bar.body.ammo, false, influence)
           }
-          else
-          /*********************************** if CreatePatch used *********************************/
+          else                    /*********************************** if CreatePatch used *********************************/
           {
             ropeSoftBody.appendAnchor(ropeNumSegmentsY*2, this.ball2.body.ammo, true, influence)
             ropeSoftBody.appendAnchor(0, this.bar.body.ammo, false, influence)
