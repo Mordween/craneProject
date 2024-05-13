@@ -17,13 +17,17 @@
     <script>
       const { Project, Scene3D, PhysicsLoader, THREE } = ENABLE3D
 
+      let hoistPos = new THREE.Vector3();
+      hoistPos.x = 0;
+      hoistPos.y = 0;
+      hoistPos.z = 8;
       const ropeBodyUse = false;
 
       class MainScene extends Scene3D {
 
         async create() {
-            const pos = new THREE.Vector3();
-            const quat = new THREE.Quaternion();
+          const pos = new THREE.Vector3();
+          const quat = new THREE.Quaternion();
 
           const { orbitControls } = await this.warpSpeed()
 
@@ -35,49 +39,36 @@
           this.physics.debug?.enable()
 
           // world axis 
-        const axesHelper = new THREE.AxesHelper( 5 );
-        axesHelper.setColors(new THREE.Color(255, 0, 0), new THREE.Color(0, 255, 0), new THREE.Color(0, 0, 255))    // in order to know which axis is the right axis
-        this.scene.add( axesHelper );
+          const axesHelper = new THREE.AxesHelper( 5 );
+          axesHelper.setColors(new THREE.Color(255, 0, 0), new THREE.Color(0, 255, 0), new THREE.Color(0, 0, 255))    // in order to know which axis is the right axis
+          this.scene.add( axesHelper );
 
 
-        // The rope
-        const ropeWidth = 0.001
-        const ropeHeight = 4
-        const cylinderRadius = 0.3
-
-
-          // ball
-          this.ball = this.physics.add.sphere({ x: 5, z: 2, collisionFlags: 2 })
+          // The rope
+          const ropeWidth = 0.001
+          const ropeHeight = 4
+          const hoistHeight = 0.5
 
           // Ball  2
-        const ballMass = 10;
-        const ballRadius = 0.6;
-        pos.set( -cylinderRadius, 0, ropeHeight-ballRadius );
-        quat.set( 0, 0, 0, 1 );
+          const ballMass = 10;
+          const ballRadius = 0.6;
+          pos.set( -hoistHeight, 0, ropeHeight-ballRadius );
+          quat.set( 0, 0, 0, 1 );
 
-        this.ball2 = this.physics.add.sphere({x:pos.x, y:pos.y, z:pos.z, radius:ballRadius })
-        this.ball2.castShadow = true;
-        this.ball2.receiveShadow = true;
+          this.ball = this.physics.add.sphere({x:pos.x, y:pos.y, z:pos.z, radius:ballRadius })
+          this.ball.castShadow = true;
+          this.ball.receiveShadow = true;
 
-        console.log("ball", this.ball2)
-        this.ball2.body.setFriction(0.8)         // comment ajouter de la friction avec l'air? 
-        // this.ball2.body.setDamping(1)         // comment ajouter de la friction avec l'air?
+          console.log("ball", this.ball)
+          this.ball.body.setFriction(0.8)         // comment ajouter de la friction avec l'air? 
 
-
-        this.wall = this.add.box({height:10, width:10, x:0, y:-10, z:5})
-        this.wall.rotateX(Math.PI/2)
-        this.physics.add.existing(this.wall, {collisionFlags: 2, mass: 155})
-          // bar
-          this.bar = this.add.cylinder({ z: 8, height: 5, radiusTop: cylinderRadius, radiusBottom: cylinderRadius })
-          this.physics.add.existing(this.bar, { collisionFlags: 2, mass: 155 })
-
-          // bar
-          // this.bar2 = this.add.cylinder({ z: 6, height: 15, radiusTop: 0.1, radiusBottom: 0.1 })
-          // this.physics.add.existing(this.bar2, { collisionFlags: 2, mass: 150 })
+          // hoist
+          this.hoist = this.add.box({ z: hoistPos.z, height: hoistHeight, width : 0.5 })
+          this.physics.add.existing(this.hoist, { collisionFlags: 2, mass: 155 })
 
           const ropeNumSegmentsZ = 1
           const ropeNumSegmentsY = 50
-          const ropePos = new THREE.Vector3(0, 0, 4-cylinderRadius)
+          const ropePos = new THREE.Vector3(0, 0, 4-hoistHeight)
 
           const ropeGeometry = new THREE.PlaneGeometry(ropeWidth, ropeHeight, ropeNumSegmentsZ, ropeNumSegmentsY)
           // ropeGeometry.rotateZ(Math.PI)
@@ -103,7 +94,7 @@
           this.physics.physicsWorld.getWorldInfo().get_m_gravity().setX(0)
           this.physics.physicsWorld.getWorldInfo().get_m_gravity().setY(0)
           this.physics.physicsWorld.getWorldInfo().get_m_gravity().setZ(-9.81)      // FIX Gravity fix
-
+          
           console.log("thisPhysics", this.physics.physicsWorld.getWorldInfo())
 
           const softBodyHelpers = new Ammo.btSoftBodyHelpers()
@@ -159,59 +150,53 @@
           ropeSoftBody.setActivationState(4)
 
 
-          // Glue the rope to the bar
+          // Glue the rope to the hoist
           const influence = 2
 
           if(ropeBodyUse == true) /*********************************** if CreateRope used *********************************/
           {
-            ropeSoftBody.appendAnchor(0, this.ball2.body.ammo, true, influence)
-            ropeSoftBody.appendAnchor(ropeNumSegmentsY, this.bar.body.ammo, false, influence)
+            ropeSoftBody.appendAnchor(0, this.ball.body.ammo, true, influence)
+            ropeSoftBody.appendAnchor(ropeNumSegmentsY, this.hoist.body.ammo, false, influence)
           }
           else                    /*********************************** if CreatePatch used *********************************/
           {
-            ropeSoftBody.appendAnchor(ropeNumSegmentsY*2, this.ball2.body.ammo, true, influence)
-            ropeSoftBody.appendAnchor(0, this.bar.body.ammo, false, influence)
+            ropeSoftBody.appendAnchor(ropeNumSegmentsY*2, this.ball.body.ammo, true, influence)
+            ropeSoftBody.appendAnchor(0, this.hoist.body.ammo, false, influence)
           }
 
           console.log(ropeSoftBody)
           ropeSoftBody.setFriction(20)
           ropeSoftBody.setRollingFriction(10)
-          console.log("friction", ropeSoftBody.getRollingFriction(), ropeSoftBody.getFriction())
 
-          console.log("body", this.rope)//.setFriction(1)
-                                                          
-          console.log("rope", ropeSoftBody)
+          this.value = 0;
 
-          console.log("ammo",Ammo)
+          console.log(this.hoist)
 
-          ropeSoftBody.translate({x:1, y:1, z:0})
-
-          console.log(this.ball2.position)
-           this.value = 0;
-           console.log(this.bar)
+          initInput()
         }
 
         update(time) {
-          // update ball
-          // this.ball.position.x -= Math.sin(time) * 0.1
-          // this.ball.body.needUpdate = true
-
-          // this.bar.position.y += Math.sin(time) * 0.01
-          // this.bar.body.needUpdate = true
+      
+          // this.hoist.position.y += Math.sin(time) * 0.01
+          // this.hoist.body.needUpdate = true
 
           /*** Friction with air ***/
-          // console.log(this.ball2.body.velocity)
-          this.ball2.body.applyForceX(- 0.5* this.ball2.body.velocity.x * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
-          this.ball2.body.applyForceY(- 0.5* this.ball2.body.velocity.y * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
-          // this.ball2.body.applyForceZ(- 0.5* this.ball2.body.velocity.z * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
+          // console.log(this.ball.body.velocity)
+          this.hoist.position.setX(hoistPos.x); this.hoist.position.setY(hoistPos.y); this.hoist.position.setZ(hoistPos.z)
 
-          // this.bar2.position.x -= this.value* 0.001
-          // this.bar2.body.needUpdate = true
+          // console.log(hoistPos)
+          this.hoist.body.needUpdate = true;
+          this.ball.body.applyForceX(- 0.05* this.ball.body.velocity.x * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
+          this.ball.body.applyForceY(- 0.05* this.ball.body.velocity.y * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
+          // this.ball.body.applyForceZ(- 0.5* this.ball.body.velocity.z * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
 
-          // this.bar.rotation.set(0, this.value+=0.01,0 )
-          // this.bar.position.set(this.bar.position.x, this.bar.position.y, this.bar.position.z+0.01)
+          // this.hoist2.position.x -= this.value* 0.001
+          // this.hoist2.body.needUpdate = true
 
-          // this.bar.body.needUpdate = true
+          // this.hoist.rotation.set(0, this.value+=0.01,0 )
+          // this.hoist.position.set(this.hoist.position.x, this.hoist.position.y, this.hoist.position.z+0.01)
+
+          // this.hoist.body.needUpdate = true
 
           // this.rope.position.setZ(this.value)
 
@@ -221,7 +206,7 @@
           //   this.rope.geometry.boundingSphere.makeEmpty();
           // }
 
-        //   console.log(this.ball2.position)
+        //   console.log(this.ball.position)
         
             
           // update rope
@@ -247,6 +232,37 @@
           // // @ts-ignore
           // this.rope.geometry.attributes.normal.needsUpdate = true
         }
+      }
+
+      function initInput()
+      {
+        window.addEventListener(
+          "keydown",
+          function (event) {
+            switch (event.code) {
+              case "KeyS":
+              case "ArrowDown":
+                // Handle "back"
+                hoistPos.y -= 0.1;
+                break;
+              case "KeyW":
+              case "ArrowUp":
+                // Handle "forward"
+                hoistPos.y += 0.1;
+                break;
+              case "KeyA":
+              case "ArrowLeft":
+                // Handle "turn left"
+                hoistPos.x -= 0.1;
+                break;
+              case "KeyD":
+              case "ArrowRight":
+                // Handle "turn right"
+                hoistPos.x += 0.1;
+                break;
+            }
+          }
+        );
       }
 
       PhysicsLoader('../lib/ammo/kripken', () => new Project({ gravity: { x: 0, y: 0, z: -9.81 }, scenes: [MainScene], softBodies: true }))
