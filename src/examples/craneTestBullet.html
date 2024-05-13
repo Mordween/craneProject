@@ -17,6 +17,8 @@
     <script>
       const { Project, Scene3D, PhysicsLoader, THREE } = ENABLE3D
 
+      const ropeBodyUse = false;
+
       class MainScene extends Scene3D {
 
         async create() {
@@ -25,7 +27,7 @@
 
           const { orbitControls } = await this.warpSpeed()
 
-          this.camera.position.set(5, 5, 10)
+          this.camera.position.set(10, 10, 20)
           orbitControls?.target.set(0, 2.5, 0)
           this.camera.lookAt(0, 2.5, 0)
 
@@ -48,7 +50,7 @@
           this.ball = this.physics.add.sphere({ x: 5, z: 2, collisionFlags: 2 })
 
           // Ball  2
-        const ballMass = 1.2;
+        const ballMass = 10;
         const ballRadius = 0.6;
         pos.set( -cylinderRadius, 0, ropeHeight-ballRadius );
         quat.set( 0, 0, 0, 1 );
@@ -57,20 +59,28 @@
         this.ball2.castShadow = true;
         this.ball2.receiveShadow = true;
 
+        console.log("ball", this.ball2)
+        this.ball2.body.setFriction(0.8)         // comment ajouter de la friction avec l'air? 
+        // this.ball2.body.setDamping(1)         // comment ajouter de la friction avec l'air?
+
+
+        this.wall = this.add.box({height:10, width:10, x:0, y:-10, z:5})
+        this.wall.rotateX(Math.PI/2)
+        this.physics.add.existing(this.wall, {collisionFlags: 2, mass: 155})
           // bar
           this.bar = this.add.cylinder({ z: 8, height: 5, radiusTop: cylinderRadius, radiusBottom: cylinderRadius })
           this.physics.add.existing(this.bar, { collisionFlags: 2, mass: 155 })
 
           // bar
-          this.bar2 = this.add.cylinder({ z: 6, height: 15, radiusTop: 0.1, radiusBottom: 0.1 })
-          this.physics.add.existing(this.bar2, { collisionFlags: 2, mass: 150 })
+          // this.bar2 = this.add.cylinder({ z: 6, height: 15, radiusTop: 0.1, radiusBottom: 0.1 })
+          // this.physics.add.existing(this.bar2, { collisionFlags: 2, mass: 150 })
 
           const ropeNumSegmentsZ = 1
           const ropeNumSegmentsY = 50
-          const ropePos = new THREE.Vector3(-cylinderRadius, 0, 4)
+          const ropePos = new THREE.Vector3(0, 0, 4-cylinderRadius)
 
           const ropeGeometry = new THREE.PlaneGeometry(ropeWidth, ropeHeight, ropeNumSegmentsZ, ropeNumSegmentsY)
-          // ropeGeometry.rotateY(Math.PI * 0.5)
+          // ropeGeometry.rotateZ(Math.PI)
           // ropeGeometry.translate(ropePos.x, ropePos.y + ropeHeight * 0.5, ropePos.z - ropeWidth * 0.5)
 
           const ropeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide })
@@ -89,14 +99,66 @@
             this.rope.material.needsUpdate = true
           })
 
+          // this.physics.physicsWorld.setGravity({x:0, y:0, z:-9.81})
+
           // rope physic object
+
+          // const softBodyWorldInfo = new Ammo.btSoftBodyWorldInfo();
+          // console.log("test", softBodyWorldInfo.get_m_gravity())
+          // console.log("test", softBodyWorldInfo.get_m_gravity().x())
+          // console.log("test", softBodyWorldInfo.get_m_gravity().y())
+          // console.log("test", softBodyWorldInfo.get_m_gravity().z())
+
+          // softBodyWorldInfo.get_m_gravity().setX(0)
+          // softBodyWorldInfo.get_m_gravity().setY(0)
+          // softBodyWorldInfo.get_m_gravity().setZ(-9.81)
+
+          // console.log("test", softBodyWorldInfo.get_m_gravity())
+          // console.log("test", softBodyWorldInfo.get_m_gravity().x())
+          // console.log("test", softBodyWorldInfo.get_m_gravity().y())
+          // console.log("test", softBodyWorldInfo.get_m_gravity().z())
+
+          // console.log("meine",softBodyWorldInfo)
+          // console.log("seine",this.physics.physicsWorld.getWorldInfo())
+          // console.log("seine",this.physics.physicsWorld.getWorldInfo().get_m_gravity().x())
+          // console.log("seine",this.physics.physicsWorld.getWorldInfo().get_m_gravity().y())
+          // console.log("seine",this.physics.physicsWorld.getWorldInfo().get_m_gravity().z())
+
+
+          console.log("thisPhysics", this.physics.physicsWorld.getWorldInfo())
+          this.physics.physicsWorld.getWorldInfo().get_m_gravity().setX(0)
+          this.physics.physicsWorld.getWorldInfo().get_m_gravity().setY(0)
+          this.physics.physicsWorld.getWorldInfo().get_m_gravity().setZ(-9.81)      // FIX Gravity fix
+
+          console.log("thisPhysics", this.physics.physicsWorld.getWorldInfo())
+
           const softBodyHelpers = new Ammo.btSoftBodyHelpers()
-          const ropeCorner00 = new Ammo.btVector3(ropePos.x, ropePos.y , ropePos.z + ropeHeight)
-          const ropeCorner01 = new Ammo.btVector3(ropePos.x, ropePos.y - ropeWidth, ropePos.z + ropeHeight)
-          const ropeCorner10 = new Ammo.btVector3(ropePos.x, ropePos.y, ropePos.z)
-          const ropeCorner11 = new Ammo.btVector3(ropePos.x, ropePos.y, ropePos.z - ropeWidth)
-          const ropeSoftBody = softBodyHelpers.CreatePatch(
+          let ropeSoftBody
+          /*********************************** CreateRope used *********************************/
+          if (ropeBodyUse === true)
+          {
+            const ropeStart = new Ammo.btVector3( ropePos.x, ropePos.y, ropePos.z );
+            const ropeEnd = new Ammo.btVector3( ropePos.x, ropePos.y , ropePos.z + ropeHeight );
+            ropeSoftBody = softBodyHelpers.CreateRope( 
+            this.physics.physicsWorld.getWorldInfo(), 
+            // softBodyWorldInfo,
+            ropeStart, 
+            ropeEnd, 
+            ropeNumSegmentsY - 1, 
+            0 
+            );
+          }
+          else
+          /*********************************** CreatePatch used *********************************/
+          {
+            const ropeCorner00 = new Ammo.btVector3(ropePos.x, ropePos.y , ropePos.z + ropeHeight)
+            const ropeCorner01 = new Ammo.btVector3(ropePos.x, ropePos.y - ropeWidth, ropePos.z + ropeHeight)
+            const ropeCorner10 = new Ammo.btVector3(ropePos.x, ropePos.y, ropePos.z)
+            const ropeCorner11 = new Ammo.btVector3(ropePos.x, ropePos.y, ropePos.z - ropeWidth)
+
+            ropeSoftBody = softBodyHelpers.CreatePatch(
             this.physics.physicsWorld.getWorldInfo(),
+            // softBodyWorldInfo,
             ropeCorner00,
             ropeCorner01,
             ropeCorner10,
@@ -105,16 +167,17 @@
             ropeNumSegmentsY + 1,
             0,
             true
-          )
+            );
+          }
+
           const sbConfig = ropeSoftBody.get_m_cfg()
           sbConfig.set_viterations(10)
           sbConfig.set_piterations(10)
 
-          ropeSoftBody.setTotalMass(0.9, false)
+          ropeSoftBody.setTotalMass(0.2, false)                                   // masse du soft body
           // @ts-ignore
-          Ammo.castObject(ropeSoftBody, Ammo.btCollisionObject).getCollisionShape().setMargin(0.04)
+          Ammo.castObject(ropeSoftBody, Ammo.btCollisionObject).getCollisionShape().setMargin(0.04)     // margin influence la traversé de la code (à travers les rigids bodies)
           this.physics.physicsWorld.addSoftBody(ropeSoftBody, 1, -1)
-
 
           console.log("this", this)
 
@@ -124,13 +187,33 @@
 
 
           // Glue the rope to the bar
-          const influence = 1
-          ropeSoftBody.appendAnchor(ropeNumSegmentsY*2, this.ball2.body.ammo, true, influence)
-          ropeSoftBody.appendAnchor(0, this.bar.body.ammo, true, influence)
+          const influence = 2
+
+          if(ropeBodyUse == true)
+          /*********************************** if CreateRope used *********************************/
+          {
+            ropeSoftBody.appendAnchor(0, this.ball2.body.ammo, true, influence)
+            ropeSoftBody.appendAnchor(ropeNumSegmentsY, this.bar.body.ammo, false, influence)
+          }
+          else
+          /*********************************** if CreatePatch used *********************************/
+          {
+            ropeSoftBody.appendAnchor(ropeNumSegmentsY*2, this.ball2.body.ammo, true, influence)
+            ropeSoftBody.appendAnchor(0, this.bar.body.ammo, false, influence)
+          }
+
+          console.log(ropeSoftBody)
+          ropeSoftBody.setFriction(20)
+          ropeSoftBody.setRollingFriction(10)
+          console.log("friction", ropeSoftBody.getRollingFriction(), ropeSoftBody.getFriction())
 
           console.log("body", this.rope)//.setFriction(1)
-          // this.rope.geometry.boundingSphere.radius = 0
-          console.log(this.rope.geometry.boundingSphere)
+                                                          
+          console.log("rope", ropeSoftBody)
+
+          console.log("ammo",Ammo)
+
+          ropeSoftBody.translate({x:1, y:1, z:0})
 
           console.log(this.ball2.position)
            this.value = 0;
@@ -139,43 +222,59 @@
 
         update(time) {
           // update ball
-          this.ball.position.x -= Math.sin(time) * 0.1
-          this.ball.body.needUpdate = true
+          // this.ball.position.x -= Math.sin(time) * 0.1
+          // this.ball.body.needUpdate = true
 
-          this.bar.position.y -= Math.sin(time) * 0.01
-          this.bar.body.needUpdate = true
+          // this.bar.position.y += Math.sin(time) * 0.01
+          // this.bar.body.needUpdate = true
 
-          this.bar2.position.x -= this.value* 0.001
-          this.bar2.body.needUpdate = true
+          /*** Friction with air ***/
+          // console.log(this.ball2.body.velocity)
+          this.ball2.body.applyForceX(- 0.5* this.ball2.body.velocity.x * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
+          this.ball2.body.applyForceY(- 0.5* this.ball2.body.velocity.y * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
+          // this.ball2.body.applyForceZ(- 0.5* this.ball2.body.velocity.z * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
 
-          this.bar.rotation.set(0, this.value+=0.01,0 )
+          // this.bar2.position.x -= this.value* 0.001
+          // this.bar2.body.needUpdate = true
 
+          // this.bar.rotation.set(0, this.value+=0.01,0 )
+          // this.bar.position.set(this.bar.position.x, this.bar.position.y, this.bar.position.z+0.01)
+
+          // this.bar.body.needUpdate = true
+
+          // this.rope.position.setZ(this.value)
+
+          // if(this.rope.geometry.boundingSphere != undefined)
+          // {
+          //   console.log(this.rope.geometry.boundingSphere)
+          //   this.rope.geometry.boundingSphere.makeEmpty();
+          // }
 
         //   console.log(this.ball2.position)
         
             
           // update rope
-          const softBody = this.rope.userData.physicsBody
-          // @ts-ignore
-          const ropePositions = this.rope.geometry.attributes.position.array
-          const numVerts = ropePositions.length / 3
+          // const softBody = this.rope.userData.physicsBody
+          // // @ts-ignore
+          // const ropePositions = this.rope.geometry.attributes.position.array
+          // const numVerts = ropePositions.length / 3
 
-          const nodes = softBody.get_m_nodes()
-          let indexFloat = 0
+          // const nodes = softBody.get_m_nodes()
+          // let indexFloat = 0
 
-          for (let i = 0; i < numVerts; i++) {
-            const node = nodes.at(i)
-            const nodePos = node.get_m_x()
-            ropePositions[indexFloat++] = nodePos.x()
-            ropePositions[indexFloat++] = nodePos.y()
-            ropePositions[indexFloat++] = nodePos.z()
-          }
+          // for (let i = 0; i < numVerts; i++) {
+          //   const node = nodes.at(i)
+          //   const nodePos = node.get_m_x()
+          //   ropePositions[indexFloat++] = nodePos.x()
+          //   ropePositions[indexFloat++] = nodePos.y()
+          //   ropePositions[indexFloat++] = nodePos.z()
+          // }
 
-          this.rope.geometry.computeVertexNormals()
+          // this.rope.geometry.computeVertexNormals()
           // @ts-ignore
-          this.rope.geometry.attributes.position.needsUpdate = true
-          // @ts-ignore
-          this.rope.geometry.attributes.normal.needsUpdate = true
+          // this.rope.geometry.attributes.position.needsUpdate = true
+          // // @ts-ignore
+          // this.rope.geometry.attributes.normal.needsUpdate = true
         }
       }
 
