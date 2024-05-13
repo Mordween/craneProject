@@ -135,8 +135,8 @@
           }
 
           const sbConfig = ropeSoftBody.get_m_cfg()
-          sbConfig.set_viterations(10)
-          sbConfig.set_piterations(10)
+          sbConfig.set_viterations(100)
+          sbConfig.set_piterations(100)       // the rope is no longer elastic
 
           ropeSoftBody.setTotalMass(0.2, false)                                   // masse du soft body
           // @ts-ignore
@@ -170,7 +170,7 @@
 
           this.value = 0;
 
-          console.log(this.hoist)
+          console.log(this.rope)
 
           initInput()
         }
@@ -186,6 +186,7 @@
 
           // console.log(hoistPos)
           this.hoist.body.needUpdate = true;
+
           this.ball.body.applyForceX(- 0.05* this.ball.body.velocity.x * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
           this.ball.body.applyForceY(- 0.05* this.ball.body.velocity.y * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
           // this.ball.body.applyForceZ(- 0.5* this.ball.body.velocity.z * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
