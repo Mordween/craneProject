@@ -14,6 +14,12 @@
   </head>
 
   <body>
+    <div id="info-text">
+      You can move the hoist using the directional arrows or the classic arrow keys.
+      You can release the ball and then the rope by pressing the Shift Right key.
+      Press the P key to bring the two plates together.
+      Or move them apart with the M
+    </div>
     <script>
       const { Project, Scene3D, PhysicsLoader, THREE } = ENABLE3D
 
@@ -99,13 +105,13 @@
           console.log("thisPhysics", this.physics.physicsWorld.getWorldInfo())
 
           const softBodyHelpers = new Ammo.btSoftBodyHelpers()
-          let ropeSoftBody
+          this.ropeSoftBody
           
           if (ropeBodyUse === true)   /*********************************** CreateRope used *********************************/
           {
             const ropeStart = new Ammo.btVector3( ropePos.x, ropePos.y, ropePos.z );
             const ropeEnd = new Ammo.btVector3( ropePos.x, ropePos.y , ropePos.z - ropeLength );
-            ropeSoftBody = softBodyHelpers.CreateRope( 
+            this.ropeSoftBody = softBodyHelpers.CreateRope( 
             this.physics.physicsWorld.getWorldInfo(), 
             ropeStart, 
             ropeEnd, 
@@ -120,7 +126,7 @@
             const ropeCornerTR = new Ammo.btVector3(ropePos.x, ropePos.y + 0.5 * ropeWidth, ropePos.z)
             const ropeCornerTL = new Ammo.btVector3(ropePos.x, ropePos.y - 0.5 * ropeWidth, ropePos.z)
 
-            ropeSoftBody = softBodyHelpers.CreatePatch(
+            this.ropeSoftBody = softBodyHelpers.CreatePatch(
             this.physics.physicsWorld.getWorldInfo(),
             ropeCornerBR,
             ropeCornerBL,
@@ -133,46 +139,79 @@
             );
           }
 
-          const sbConfig = ropeSoftBody.get_m_cfg()
+          const sbConfig = this.ropeSoftBody.get_m_cfg()
           sbConfig.set_viterations(100)
           sbConfig.set_piterations(100)       // the rope is no longer elastic
 
-          ropeSoftBody.setTotalMass(0.2, false)                  
+          this.ropeSoftBody.setTotalMass(0.2, false)                  
           // @ts-ignore
-          Ammo.castObject(ropeSoftBody, Ammo.btCollisionObject).getCollisionShape().setMargin(0.04) 
-          this.physics.physicsWorld.addSoftBody(ropeSoftBody, 1, -1)
+          Ammo.castObject(this.ropeSoftBody, Ammo.btCollisionObject).getCollisionShape().setMargin(0.04) 
+          this.physics.physicsWorld.addSoftBody(this.ropeSoftBody, 1, -1)
 
           console.log("this", this)
 
-          this.rope.userData.physicsBody = ropeSoftBody
+          this.rope.userData.physicsBody = this.ropeSoftBody
           
           // Disable deactivation
-          ropeSoftBody.setActivationState(4)
+          this.ropeSoftBody.setActivationState(4)
 
+
+
+          
+          const armParams = {
+            mass: 10,
+            z: 2,
+            height: 2,
+            width: 0.2,
+            depth: 2,
+            collisionFlags: 2
+          }
+
+          const addArm = x => {
+            const arm = this.physics.add.box({
+              ...armParams,
+              x
+            })
+            arm.body.setFriction(1)
+            arm.userData.touched = 0
+            arm.body.on.collision((object, event) => {
+              if (object.name !== 'heavy_box') return
+              arm.userData.touched = event === 'start' || event === 'collision'
+            })
+            return arm
+          }
+
+          this.leftArm = addArm(-2)
+          this.rightArm = addArm(2)
 
           // Glue the rope to the hoist
           const influence = 1
 
           if(ropeBodyUse == true) /*********************************** if CreateRope used *********************************/
           {
-            ropeSoftBody.appendAnchor(0, this.ball.body.ammo, true, influence)
-            ropeSoftBody.appendAnchor(ropeNumSegmentsY, this.hoist.body.ammo, false, influence)
+            this.ropeSoftBody.appendAnchor(ropeNumSegmentsY, this.hoist.body.ammo, false, influence)
+            this.ropeSoftBody.appendAnchor(0, this.ball.body.ammo, true, influence)
           }
           else                    /*********************************** if CreatePatch used *********************************/
           {
-            ropeSoftBody.appendAnchor(0, this.ball.body.ammo, true, influence)
-            ropeSoftBody.appendAnchor(ropeNumSegmentsY*2, this.hoist.body.ammo, false, influence)
+            this.ropeSoftBody.appendAnchor(ropeNumSegmentsY*2, this.hoist.body.ammo, false, influence)
+
+            // this.ropeSoftBody.appendAnchor(0, this.leftArm.body.ammo, false, influence)
+            // this.ropeSoftBody.appendAnchor(0, this.rightArm.body.ammo, false, influence)
+            this.ropeSoftBody.appendAnchor(0, this.ball.body.ammo, true, influence)
           }
 
-          console.log(ropeSoftBody)
-          ropeSoftBody.setFriction(20)
-          ropeSoftBody.setRollingFriction(10)
+          console.log(this.ropeSoftBody)
+          this.ropeSoftBody.setFriction(20)
+          this.ropeSoftBody.setRollingFriction(10)
+
+          this.initInput()
 
 
-          initInput()
         }
 
-        update(time) {
+        update(time) 
+        {
         
           this.hoist.position.setX(hoistPos.x); this.hoist.position.setY(hoistPos.y); this.hoist.position.setZ(hoistPos.z)
           this.hoist.body.needUpdate = true;
@@ -183,37 +222,63 @@
           this.ball.body.applyForceZ(- 0.05* this.ball.body.velocity.z * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
 
         }
-      }
 
-      function initInput()
-      {
-        window.addEventListener(
-          "keydown",
-          function (event) {
-            switch (event.code) {
-              case "KeyS":
-              case "ArrowDown":
-                // Handle "back"
-                hoistPos.y -= 0.1;
-                break;
-              case "KeyW":
-              case "ArrowUp":
-                // Handle "forward"
-                hoistPos.y += 0.1;
-                break;
-              case "KeyA":
-              case "ArrowLeft":
-                // Handle "turn left"
-                hoistPos.x -= 0.1;
-                break;
-              case "KeyD":
-              case "ArrowRight":
-                // Handle "turn right"
-                hoistPos.x += 0.1;
-                break;
+        initInput()
+        {
+          window.addEventListener(
+            "keydown",
+            (envent) => {
+              switch (event.code) {
+                case "KeyS":
+                case "ArrowDown":
+                  // Handle "back"
+                  hoistPos.y -= 0.1;
+                  break;
+                case "KeyW":
+                case "ArrowUp":
+                  // Handle "forward"
+                  hoistPos.y += 0.1;
+                  break;
+                case "KeyA":
+                case "ArrowLeft":
+                  // Handle "turn left"
+                  hoistPos.x -= 0.1;
+                  break;
+                case "KeyD":
+                case "ArrowRight":
+                  // Handle "turn right"
+                  hoistPos.x += 0.1;
+                  break;
+
+                case "Shift":
+                case "ShiftRight": 
+                  // deleate last anchor
+                  this.ropeSoftBody.m_anchors.pop_back()
+                  break;
+
+                case "p": 
+                case "KeyP": 
+                  this.leftArm.position.x += 0.1
+                  this.rightArm.position.x -= 0.1
+
+                  this.rightArm.body.needUpdate = true
+                  this.leftArm.body.needUpdate = true
+                  break;
+
+                case "m": 
+                case "Semicolon": 
+                  this.leftArm.position.x -= 0.1
+                  this.rightArm.position.x += 0.1
+
+                  this.rightArm.body.needUpdate = true
+                  this.leftArm.body.needUpdate = true
+                  break;
+              }
             }
-          }
-        );
+          );
+        }
+
+
       }
 
       PhysicsLoader('../lib/ammo/kripken', () => new Project({ gravity: { x: 0, y: 0, z: -9.81 }, scenes: [MainScene], softBodies: true }))
