@@ -66,7 +66,6 @@
           this.ball.castShadow = true;
           this.ball.receiveShadow = true;
 
-          console.log("ball", this.ball)
           this.ball.body.setFriction(0.8)         // comment ajouter de la friction avec l'air? 
 
           // hoist
@@ -138,9 +137,9 @@
           sbConfig.set_viterations(100)
           sbConfig.set_piterations(100)       // the rope is no longer elastic
 
-          ropeSoftBody.setTotalMass(0.2, false)                                   // masse du soft body
+          ropeSoftBody.setTotalMass(0.2, false)                  
           // @ts-ignore
-          Ammo.castObject(ropeSoftBody, Ammo.btCollisionObject).getCollisionShape().setMargin(0.04)     // margin influence la traversé de la code (à travers les rigids bodies)
+          Ammo.castObject(ropeSoftBody, Ammo.btCollisionObject).getCollisionShape().setMargin(0.04) 
           this.physics.physicsWorld.addSoftBody(ropeSoftBody, 1, -1)
 
           console.log("this", this)
@@ -152,7 +151,7 @@
 
 
           // Glue the rope to the hoist
-          const influence = 2
+          const influence = 1
 
           if(ropeBodyUse == true) /*********************************** if CreateRope used *********************************/
           {
