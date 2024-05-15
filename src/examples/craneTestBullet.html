@@ -21,7 +21,7 @@
       Or move them apart with the M
     </div>
     <script>
-      const { Project, Scene3D, PhysicsLoader, THREE } = ENABLE3D
+      const { Project, Scene3D, PhysicsLoader, THREE, ExtendedObject3D } = ENABLE3D
 
       const hoistPos =  new THREE.Vector3();
       const ballPos =  new THREE.Vector3();
@@ -48,6 +48,8 @@
 
 
       const ropeBodyUse = false;    // keep false, true is cursed
+
+      let value = Math.PI/4
 
       class MainScene extends Scene3D {
 
@@ -205,14 +207,19 @@
           this.ropeSoftBody.setFriction(20)
           this.ropeSoftBody.setRollingFriction(10)
 
+          this.loadGLBFile('leftGrab', 2, {x:0.2, y:0, z:4}, {x:0, y:Math.PI/4, z:0})
+          this.loadGLBFile('rightGrab', 2, {x:-0.2, y:0, z:4}, {x:0, y:-Math.PI/4, z:Math.PI})
+
           this.initInput()
+
+
 
 
         }
 
         update(time) 
         {
-        
+
           this.hoist.position.setX(hoistPos.x); this.hoist.position.setY(hoistPos.y); this.hoist.position.setZ(hoistPos.z)
           this.hoist.body.needUpdate = true;
 
@@ -221,6 +228,28 @@
           this.ball.body.applyForceY(- 0.05* this.ball.body.velocity.y * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
           this.ball.body.applyForceZ(- 0.05* this.ball.body.velocity.z * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
 
+        }
+
+        loadGLBFile(name, scale, position = {x: number, y: number, z: number}, rotation = {x: number, y: number, z: number})
+        {
+          this.load.gltf('./object/grab.glb').then(gltf => {
+
+            let object = new ExtendedObject3D()
+            const mesh = gltf.scene.children[0]
+            object.add(mesh)
+            object.position.set(position.x, position.y, position.z)
+            object.rotation.set(rotation.x, rotation.y, rotation.z)
+
+            object.scale.setX(scale); object.scale.setY(scale); object.scale.setZ(scale);
+
+            object.name = name;
+
+            this[name] = object
+            this.add.mesh(this[name])
+
+            this.physics.add.existing(this[name], { collisionFlags: 2, shape: 'mesh', mass : 0})    // mass = 0 => kinematics mesh
+            console.log(this)
+          });
         }
 
         initInput()
@@ -263,6 +292,11 @@
 
                   this.rightArm.body.needUpdate = true
                   this.leftArm.body.needUpdate = true
+
+                  this.leftGrab.rotation.set(0, value+=0.01, 0)
+                  this.rightGrab.rotation.set(0, -value, Math.PI)
+                  this.leftGrab.body.needUpdate = true
+                  this.rightGrab.body.needUpdate = true
                   break;
 
                 case "m": 
@@ -272,6 +306,11 @@
 
                   this.rightArm.body.needUpdate = true
                   this.leftArm.body.needUpdate = true
+
+                  this.leftGrab.rotation.set(0, value-=0.01, 0)
+                  this.rightGrab.rotation.set(0, -value, Math.PI)
+                  this.leftGrab.body.needUpdate = true
+                  this.rightGrab.body.needUpdate = true
                   break;
               }
             }
