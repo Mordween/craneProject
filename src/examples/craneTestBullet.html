@@ -10,7 +10,7 @@
     <title>SoftBody rope</title>
     <link rel="stylesheet" href="../css/examples.css?ver=1.0.0" />
     <script src="../js/examples.js?ver=1.1.1"></script>
-    <script src="../lib/enable3d/enable3d.framework.0.25.4.min.js"></script>
+    <script src="../lib/enable3d/enable3d.framework.0.25.4.min.Zup.js"></script>
   </head>
 
   <body>
@@ -42,9 +42,9 @@
       const ballRadius = 0.6;
 
 
-      hoistPos.set(0, 0, 8)
+      hoistPos.set(0, 0, 6.5)
       ropePos.set(hoistPos.x, hoistPos.y, hoistPos.z-hoistHeight)
-      ballPos.set( ropePos.x, ropePos.y, ropePos.z - ropeLength-ballRadius );
+      ballPos.set( ropePos.x, 5+ropePos.y, ropePos.z - ropeLength-ballRadius );
 
 
       const ropeBodyUse = false;    // keep false, true is cursed
@@ -183,8 +183,13 @@
             return arm
           }
 
-          this.leftArm = addArm(-2)
-          this.rightArm = addArm(2)
+          // this.leftArm = addArm(-2)
+          // this.rightArm = addArm(2)
+
+          this.loadGLBFile('leftGrab', 2, {x:ropePos.x + 0.2, y:ropePos.y, z:ropePos.z-ropeLength}, {x:0, y:Math.PI/4, z:0})
+          this.loadGLBFile('rightGrab', 2, {x:ropePos.x -0.2, y:ropePos.y, z:ropePos.z-ropeLength}, {x:0, y:-Math.PI/4, z:Math.PI})
+
+          await new Promise(r => setTimeout(r, 2000));    // wait 2 seconds 
 
           // Glue the rope to the hoist
           const influence = 1
@@ -197,23 +202,22 @@
           else                    /*********************************** if CreatePatch used *********************************/
           {
             this.ropeSoftBody.appendAnchor(ropeNumSegmentsY*2, this.hoist.body.ammo, false, influence)
+            // this.ropeSoftBody.appendAnchor(0, this.ball.body.ammo, true, influence)
 
-            // this.ropeSoftBody.appendAnchor(0, this.leftArm.body.ammo, false, influence)
-            // this.ropeSoftBody.appendAnchor(0, this.rightArm.body.ammo, false, influence)
-            this.ropeSoftBody.appendAnchor(0, this.ball.body.ammo, true, influence)
+            this.ropeSoftBody.appendAnchor(0, this.leftGrab.body.ammo, false, 1)
+            this.ropeSoftBody.appendAnchor(0, this.rightGrab.body.ammo, false, 1)
           }
 
           console.log(this.ropeSoftBody)
           this.ropeSoftBody.setFriction(20)
           this.ropeSoftBody.setRollingFriction(10)
 
-          this.loadGLBFile('leftGrab', 2, {x:0.2, y:0, z:4}, {x:0, y:Math.PI/4, z:0})
-          this.loadGLBFile('rightGrab', 2, {x:-0.2, y:0, z:4}, {x:0, y:-Math.PI/4, z:Math.PI})
+          this.createHinge()
 
+          this.brick = this.addBrick({x:0, y:0, z:0}, {x:0, y:0, z:0}, 4)
           this.initInput()
 
-
-
+          console.log("contrainte", this.physics)
 
         }
 
@@ -234,6 +238,8 @@
         {
           this.load.gltf('./object/grab.glb').then(gltf => {
 
+            console.log("first")
+
             let object = new ExtendedObject3D()
             const mesh = gltf.scene.children[0]
             object.add(mesh)
@@ -247,9 +253,35 @@
             this[name] = object
             this.add.mesh(this[name])
 
-            this.physics.add.existing(this[name], { collisionFlags: 2, shape: 'mesh', mass : 0})    // mass = 0 => kinematics mesh
+            this.physics.add.existing(this[name], { collisionFlags: 0, shape: 'mesh', mass : 1})    // mass = 0 => kinematics mesh
             console.log(this)
           });
+        }
+
+        createHinge()
+        {
+          this.physics.add.constraints.hinge(this.leftGrab.body, this.rightGrab.body, {
+            pivotA: { x: 0, y: 0, z: 0 },
+            pivotB: { x: 0, y: 0, z: 0 },
+            axisA: { x: 0, y: 1, z: 0},
+            axisB: { x: 0, y: -1, z: 0} 
+          })
+        }
+
+        addBrick = (position = {x: number, y: number, z: number}, rotation = {x: number, y: number, z: number}, scale)=> {
+          const brick = this.physics.add.box({
+            mass: 10,
+            x: position.x,
+            y: position.y,
+            z: position.z,
+            height: 0.22*scale,
+            width: 0.105*scale,
+            depth: 0.06*scale,
+            collisionFlags: 0,
+            scale: scale,
+          })
+          brick.body.setFriction(1)
+          return brick
         }
 
         initInput()
@@ -287,30 +319,38 @@
 
                 case "p": 
                 case "KeyP": 
-                  this.leftArm.position.x += 0.1
-                  this.rightArm.position.x -= 0.1
+                  // this.leftArm.position.x += 0.1
+                  // this.rightArm.position.x -= 0.1
 
-                  this.rightArm.body.needUpdate = true
-                  this.leftArm.body.needUpdate = true
+                  // this.rightArm.body.needUpdate = true
+                  // this.leftArm.body.needUpdate = true
 
                   this.leftGrab.rotation.set(0, value+=0.01, 0)
                   this.rightGrab.rotation.set(0, -value, Math.PI)
+
                   this.leftGrab.body.needUpdate = true
                   this.rightGrab.body.needUpdate = true
+
+                  this.physics.constraints.setRotation(0,value+=0.01, 0 )
+                  this.physics.needUpdate = true
                   break;
 
                 case "m": 
                 case "Semicolon": 
-                  this.leftArm.position.x -= 0.1
-                  this.rightArm.position.x += 0.1
+                  // this.leftArm.position.x -= 0.1
+                  // this.rightArm.position.x += 0.1
 
-                  this.rightArm.body.needUpdate = true
-                  this.leftArm.body.needUpdate = true
+                  // this.rightArm.body.needUpdate = true
+                  // this.leftArm.body.needUpdate = true
 
                   this.leftGrab.rotation.set(0, value-=0.01, 0)
                   this.rightGrab.rotation.set(0, -value, Math.PI)
+
                   this.leftGrab.body.needUpdate = true
                   this.rightGrab.body.needUpdate = true
+
+                  this.physics.constraints.setRotation(0,value-=0.01, 0 )
+                  this.physics.needUpdate = true
                   break;
               }
             }
