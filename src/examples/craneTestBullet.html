@@ -261,10 +261,10 @@
           this.ball.body.applyForceY(- 0.05* this.ball.body.velocity.y * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
           this.ball.body.applyForceZ(- 0.05* this.ball.body.velocity.z * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
 
-          /*** Friction with air ***/ //seems not working for the brick
-          this.brick.body.applyForceX(- 1* this.ball.body.velocity.x * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
-          this.brick.body.applyForceY(- 1* this.ball.body.velocity.y * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
-          this.brick.body.applyForceZ(- 1* this.ball.body.velocity.z * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+          /*** Friction with air ***/ 
+          this.brick.body.applyForceX(- 0.05* this.brick.body.velocity.x * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+          this.brick.body.applyForceY(- 0.05* this.brick.body.velocity.y * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+          this.brick.body.applyForceZ(- 0.05* this.brick.body.velocity.z * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
 
         }
 
