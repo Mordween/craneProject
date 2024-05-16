@@ -187,8 +187,8 @@
           // this.leftArm = addArm(-2)
           // this.rightArm = addArm(2)
 
-          this.loadGLBFile('leftGrab', 2, {x:ropePos.x + 0.2, y:ropePos.y, z:ropePos.z-ropeLength}, {x:Math.PI/2, y:Math.PI/4, z:0})
-          this.loadGLBFile('rightGrab', 2, {x:ropePos.x -0.2, y:ropePos.y, z:ropePos.z-ropeLength}, {x:Math.PI/2, y:-Math.PI/4, z:Math.PI})
+          this.loadGLBFile('leftGrab', 2, {x:ropePos.x + 0.2, y:ropePos.y, z:ropePos.z-ropeLength-0.25}, {x:Math.PI/2, y:Math.PI/4, z:0})
+          this.loadGLBFile('rightGrab', 2, {x:ropePos.x -0.2, y:ropePos.y, z:ropePos.z-ropeLength-0.25}, {x:Math.PI/2, y:-Math.PI/4, z:Math.PI})
 
           await new Promise(r => setTimeout(r, 2000));    // wait 2 seconds 
 
@@ -235,10 +235,10 @@
           this.ball.body.applyForceY(- 0.05* this.ball.body.velocity.y * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
           this.ball.body.applyForceZ(- 0.05* this.ball.body.velocity.z * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
 
-          /*** Friction with air ***/
-          this.brick.body.applyForceX(- 1* this.ball.body.velocity.x * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
-          this.brick.body.applyForceY(- 1* this.ball.body.velocity.y * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
-          this.brick.body.applyForceZ(- 1* this.ball.body.velocity.z * 0.47 * this.physics.physicsWorld.getWorldInfo().air_density )
+          /*** Friction with air ***/ //seems not working for the brick
+          this.brick.body.applyForceX(- 1* this.ball.body.velocity.x * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+          this.brick.body.applyForceY(- 1* this.ball.body.velocity.y * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+          this.brick.body.applyForceZ(- 1* this.ball.body.velocity.z * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
 
         }
 
@@ -255,14 +255,14 @@
             object.rotation.set(rotation.x, rotation.y, rotation.z)
 
             object.scale.setX(scale); object.scale.setY(scale); object.scale.setZ(scale);
-
             object.name = name;
 
             this[name] = object
             this.add.mesh(this[name])
 
             this.physics.add.existing(this[name], { collisionFlags: 2, shape: 'mesh', mass : 1})    // mass = 0 => kinematics mesh
-            console.log(this)
+            this[name].body.setFriction(1)
+
           });
         }
 
