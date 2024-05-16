@@ -8,7 +8,7 @@ const main = function () {
 
   const addFloatingButton = () => {
     // link to repository
-    let repo = 'https://github.com/enable3d/enable3d-website/tree/master/src'
+    let repo = 'https://github.com/Mordween/craneProject/tree/master/src'
     let pathname = window.location.pathname
 
     // link to .js file if it is a "headless mode" example
@@ -24,7 +24,7 @@ const main = function () {
     task(() => {
       const element = jsx`
         <div>
-          <a href="${repo + pathname}">
+          <a href="${repo + pathname}"  target="_blank">
             <div id="floating-action-button">
               <div>${'❮❯'}</div>
             </div>

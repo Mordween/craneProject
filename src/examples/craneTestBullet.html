@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>SoftBody rope</title>
+    <title>Crane</title>
     <link rel="stylesheet" href="../css/examples.css?ver=1.0.0" />
     <script src="../js/examples.js?ver=1.1.1"></script>
     <script src="../lib/enable3d/enable3d.framework.0.25.4.min.Zup.js"></script>
@@ -15,11 +15,12 @@
 
   <body>
     <div id="info-text">
-      You can move the hoist using the directional arrows or the classic arrow keys.
-      You can release the ball and then the rope by pressing the Shift Right key.
-      Press the P key to bring the two plates together.
-      Or move them apart with the M
-      Press Enter to spawn a brick
+      You can move the hoist using the <b>directional arrows</b> or the <b>classic keys</b>.
+      You can release the ball and then the rope by pressing the <b>Shift Right</b> key. <br>
+      Press the <b>P</b> key to bring the two plates together.
+      Or move them apart with the <b>M</b>
+      Press <b>Enter</b> to spawn a brick <br>
+      <b>UHJK</b> to move the arm
     </div>
     <script>
       const { Project, Scene3D, PhysicsLoader, THREE, ExtendedObject3D } = ENABLE3D
@@ -58,9 +59,9 @@
 
           const { orbitControls } = await this.warpSpeed()
 
-          this.camera.position.set(10, 10, 20)
+          this.camera.position.set(-10, -10, 15)
           orbitControls?.target.set(0, 2.5, 0)
-          this.camera.lookAt(0, 2.5, 0)
+          this.camera.lookAt(0, 0, 0)
 
           // enable physics debugging
           this.physics.debug?.enable()
