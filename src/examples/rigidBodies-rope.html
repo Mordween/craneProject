@@ -22,9 +22,9 @@
     </div>
     <script>
       const { Project, Scene3D, PhysicsLoader, THREE, ExtendedObject3D } = ENABLE3D
+      let length = 20;
 
       class MainScene extends Scene3D {
-
 
         async create() {
 
@@ -51,9 +51,19 @@
 
             //   this.rigidRope({x:5, y:5, z:20}, 20)
 
-            this.rigidDOFRope({x:5, y:0, z:20}, 20)
-            this.rigidTwistRope({x:0, y:0, z:20}, 20)
-            this.rigidP2PRope({x:-5, y:0, z:20}, 20)
+            
+            this.ball = []
+            this.ball[0] = this.rigidDOFRope({x:5, y:-5, z:20}, length, 0.01)
+            this.ball[1] = this.rigidTwistRope({x:0, y:-5, z:20}, length, 0.01)
+            this.ball[2] = this.rigidP2PRope({x:-5, y:-5, z:20}, length, 0.01)
+
+            this.ball[3] = this.rigidDOFRope({x:5, y:0, z:20}, length, 0.05)
+            this.ball[4] = this.rigidTwistRope({x:0, y:0, z:20}, length, 0.05)
+            this.ball[5] = this.rigidP2PRope({x:-5, y:0, z:20}, length, 0.05)
+
+            this.ball[6] = this.rigidDOFRope({x:5, y:5, z:20}, length, 0.1)
+            this.ball[7] = this.rigidTwistRope({x:0, y:5, z:20}, length, 0.1)
+            this.ball[8] = this.rigidP2PRope({x:-5, y:5, z:20}, length, 0.1)
          
 
           const dof = x => {
@@ -120,135 +130,91 @@
           return brick
         }
 
-        rigidTwistRope(position = {x: number, y: number, z: number}, numberOfPoint)
+        rigidTwistRope(position = {x: number, y: number, z: number}, numberOfPoint, radius)
         {
-          this.ball2.length = numberOfPoint;
-          this.ball2[0] = this.physics.add.sphere({
+          let ball = []
+          ball[0] = this.physics.add.sphere({
           mass: 1,
           x: position.x,
           y: position.y,
           z: position.z,
-          radius:0.1,
+          radius:radius,
           collisionFlags: 2,})
 
             for(let i = 1; i< numberOfPoint; i++)
             {
-                this.ball2[i] = this.physics.add.sphere({
+                ball[i] = this.physics.add.sphere({
                 mass: 0.05,
                 x: position.x,
                 y: position.y,
                 z: position.z - 0.2*i,  
-                radius:0.1,
+                radius:radius,
                 collisionFlags: 0,
               })
-              this.constraint = this.physics.add.constraints.coneTwist(this.ball2[i-1].body, this.ball2[i].body, {
-              frameA: { x: 0, y: 0, z: -0.2 },
-              frameB: { x: 0, y: 0, z: 0.2 }
-            })
+              this.constraint = this.physics.add.constraints.coneTwist(ball[i-1].body, ball[i].body, {
+              frameA: { x: 0, y: 0, z: -0.1 },
+              frameB: { x: 0, y: 0, z: 0.1 }
+                })
             }
+            return ball
         }
 
-        rigidDOFRope(position = {x: number, y: number, z: number}, numberOfPoint)
+        rigidDOFRope(position = {x: number, y: number, z: number}, numberOfPoint, radius)
         {
-          this.ball1.length = numberOfPoint;
-          this.ball1[0] = this.physics.add.sphere({
+          let ball = []
+          ball[0] = this.physics.add.sphere({
           mass: 1,
           x: position.x,
           y: position.y,
           z: position.z,
-          radius:0.1,
+          radius:radius,
           collisionFlags: 2,})
 
             for(let i = 1; i< numberOfPoint; i++)
             {
-                this.ball1[i] = this.physics.add.sphere({
+                ball[i] = this.physics.add.sphere({
                 mass: 0.05,
                 x: position.x,
                 y: position.y,
                 z: position.z - 0.2*i,  
-                radius:0.1,
+                radius:radius,
                 collisionFlags: 0,
               })
-
-              this.constraint = this.physics.add.constraints.dof(this.ball1[i-1].body, this.ball1[i].body,  { center: true })
+              this.constraint = this.physics.add.constraints.dof(ball[i-1].body, ball[i].body,  { center: true })
               this.constraint.setLinearLowerLimit(0)
               this.constraint.setLinearUpperLimit(0)
-
             }
+            return ball
         }
 
-        rigidP2PRope(position = {x: number, y: number, z: number}, numberOfPoint)
+        rigidP2PRope(position = {x: number, y: number, z: number}, numberOfPoint, radius)
         {
-          this.ball.length = numberOfPoint;
-          this.ball[0] = this.physics.add.sphere({
+          let ball = []
+          ball[0] = this.physics.add.sphere({
           mass: 1,
           x: position.x,
           y: position.y,
           z: position.z,
-          radius:0.1,
+          radius:radius,
           collisionFlags: 2,})
 
             for(let i = 1; i< numberOfPoint; i++)
             {
-                this.ball[i] = this.physics.add.sphere({
+                ball[i] = this.physics.add.sphere({
                 mass: 0.05,
                 x: position.x,
                 y: position.y,
                 z: position.z - 0.2*i,  
-                radius:0.1,
+                radius:radius,
                 collisionFlags: 0,
               })
-              this.constraint = this.physics.add.constraints.pointToPoint(this.ball[i-1].body, this.ball[i].body, {
+              this.constraint = this.physics.add.constraints.pointToPoint(ball[i-1].body, ball[i].body, {
               // the offset from the center of each object
               pivotA: { z: 0 },
               pivotB: { z: 0.2  }
               }) 
-
             }
-        }
-
-        rigidRope(position = {x: number, y: number, z: number}, numberOfPoint)
-        {
-          this.ball.length = numberOfPoint;
-          this.ball[0] = this.physics.add.sphere({
-          mass: 1,
-          x: position.x,
-          y: position.y,
-          z: position.z,
-          radius:0.1,
-          collisionFlags: 2,})
-
-            for(let i = 1; i< numberOfPoint; i++)
-            {
-                this.ball[i] = this.physics.add.sphere({
-                mass: 0.05,
-                x: position.x,
-                y: position.y,
-                z: position.z - 0.2*i,  
-                radius:0.1,
-                collisionFlags: 0,
-              })
-              // this.constraint = this.physics.add.constraints.pointToPoint(this.ball[i-1].body, this.ball[i].body, {
-              // // the offset from the center of each object
-              // pivotA: { z: 0 },
-              // pivotB: { z: 0.2  }
-              // }) 
-              // this.constraint = this.physics.add.constraints.dof(this.ball[i-1].body, this.ball[i].body,  { center: true })
-              // console.log(this.constraint.getBreakingImpulseThreshold()) // good
-
-              // this.constraint.get_m_setting().set_m_impulseClamp(10000)
-              // this.constraint.get_m_setting().set_m_tau(10000)
-              // console.log(this.constraint.get_m_setting())
-              // this.constraint.setLinearLowerLimit(0)
-              // this.constraint.setLinearUpperLimit(0)
-
-              this.constraint = this.physics.add.constraints.coneTwist(this.ball[i-1].body, this.ball[i].body, {
-              frameA: { x: 0, y: 0, z: -0.2 },
-              frameB: { x: 0, y: 0, z: 0.2 }
-            })
-              console.log(this.constraint)
-
-            }
+            return ball
         }
 
         initInput()
@@ -260,53 +226,52 @@
                 case "KeyS":
                 case "ArrowDown":
                   // Handle "back"
-                  this.ball[0].position.y -= 0.1;
-                  this.ball[0].body.needUpdate = true;
-                  this.ball1[0].position.y -= 0.1;
-                  this.ball1[0].body.needUpdate = true;
-                  this.ball2[0].position.y -= 0.1;
-                  this.ball2[0].body.needUpdate = true;
+                  for(let i = 0; i<9; i++)
+                  {
+                    this.ball[i][0].position.y -= 0.1;
+                    this.ball[i][0].body.needUpdate = true;
+                  }
+
                   break;
                 case "KeyW":
                 case "ArrowUp":
                   // Handle "forward"
-                  this.ball[0].position.y += 0.1;
-                  this.ball[0].body.needUpdate = true;
-                  this.ball1[0].position.y += 0.1;
-                  this.ball1[0].body.needUpdate = true;
-                  this.ball2[0].position.y += 0.1;
-                  this.ball2[0].body.needUpdate = true;
+                  for(let i = 0; i<9; i++)
+                  {
+                    this.ball[i][0].position.y += 0.1;
+                    this.ball[i][0].body.needUpdate = true;
+                  }
 
                   break;
                 case "KeyA":
                 case "ArrowLeft":
                   // Handle "turn left"
-                  this.ball[0].position.x -= 0.1;
-                  this.ball[0].body.needUpdate = true;
-                  this.ball1[0].position.x -= 0.1;
-                  this.ball1[0].body.needUpdate = true;
-                  this.ball2[0].position.x -= 0.1;
-                  this.ball2[0].body.needUpdate = true;
+                  for(let i = 0; i<9; i++)
+                  {
+                    this.ball[i][0].position.x -= 0.1;
+                    this.ball[i][0].body.needUpdate = true;
+                  }
 
                   break;
                 case "KeyD":
                 case "ArrowRight":
                   // Handle "turn right"
-                  this.ball[0].position.x += 0.1;
-                  this.ball[0].body.needUpdate = true;
-                  this.ball1[0].position.x += 0.1;
-                  this.ball1[0].body.needUpdate = true;
-                  this.ball2[0].position.x += 0.1;
-                  this.ball2[0].body.needUpdate = true;
+                  for(let i = 0; i<9; i++)
+                  {
+                    this.ball[i][0].position.x += 0.1;
+                    this.ball[i][0].body.needUpdate = true;
+                  }
 
                   break;
 
                 case "NumpadEnter": 
-                this.brick = this.addBrick(
+                for(let i = 0; i<9; i++)
+                {
+                    this.brick = this.addBrick(
                     {
-                      x:this.ball[this.ball.length-1].position.x, 
-                      y:this.ball[this.ball.length-1].position.y, 
-                      z:this.ball[this.ball.length-1].position.z-0.03*4
+                      x:this.ball[i][length-1].position.x, 
+                      y:this.ball[i][length-1].position.y, 
+                      z:this.ball[i][length-1].position.z-0.03*4
                     }, 
                     {
                       x: 0,
@@ -315,49 +280,13 @@
                     }, 
                     4
                   );
-                  this.physics.add.constraints.pointToPoint(this.ball[this.ball.length-1].body,this.brick.body, {
+                  this.physics.add.constraints.pointToPoint(this.ball[i][length-1].body,this.brick.body, {
                     // the offset from the center of each object
                     pivotA: { z: -0.1 },
                     pivotB: { z: 0.1  }
                   })
+                }
 
-                  this.brick = this.addBrick(
-                    {
-                      x:this.ball1[this.ball1.length-1].position.x, 
-                      y:this.ball1[this.ball1.length-1].position.y, 
-                      z:this.ball1[this.ball1.length-1].position.z-0.03*4
-                    }, 
-                    {
-                      x: 0,
-                      y: 0, 
-                      z: 0
-                    }, 
-                    4
-                  );
-                  this.physics.add.constraints.pointToPoint(this.ball1[this.ball1.length-1].body,this.brick.body, {
-                    // the offset from the center of each object
-                    pivotA: { z: -0.1 },
-                    pivotB: { z: 0.1  }
-                  })
-
-                  this.brick = this.addBrick(
-                    {
-                      x:this.ball2[this.ball2.length-1].position.x, 
-                      y:this.ball2[this.ball2.length-1].position.y, 
-                      z:this.ball2[this.ball2.length-1].position.z-0.03*4
-                    }, 
-                    {
-                      x: 0,
-                      y: 0, 
-                      z: 0
-                    }, 
-                    4
-                  );
-                  this.physics.add.constraints.pointToPoint(this.ball2[this.ball2.length-1].body,this.brick.body, {
-                    // the offset from the center of each object
-                    pivotA: { z: -0.1 },
-                    pivotB: { z: 0.1  }
-                  })
                 break;
               }
             }
