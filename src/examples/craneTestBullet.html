@@ -49,7 +49,7 @@
       ballPos.set( ropePos.x, 5+ropePos.y, ropePos.z - ropeLength-ballRadius );
 
 
-      const ropeBodyUse = false;    // keep false, true is cursed
+      const ropeBodyUse = false;  
 
       let value = Math.PI/4
 
@@ -59,7 +59,7 @@
 
           const { orbitControls } = await this.warpSpeed()
 
-          this.camera.position.set(-10, -10, 15)
+          this.camera.position.set(-10, -10, 50)
           orbitControls?.target.set(0, 2.5, 0)
           this.camera.lookAt(0, 0, 0)
 
@@ -159,8 +159,6 @@
           // Disable deactivation
           this.ropeSoftBody.setActivationState(4)
 
-
-
           
           const armParams = {
             mass: 100,
@@ -223,8 +221,8 @@
 
           if(ropeBodyUse == true) /*********************************** if CreateRope used *********************************/
           {
-            this.ropeSoftBody.appendAnchor(ropeNumSegmentsY, this.hoist.body.ammo, false, influence)
-            this.ropeSoftBody.appendAnchor(0, this.ball.body.ammo, true, influence)
+            this.ropeSoftBody.appendAnchor(0, this.hoist.body.ammo, false, influence)
+            // this.ropeSoftBody.appendAnchor(0, this.ball.body.ammo, true, influence)
           }
           else                    /*********************************** if CreatePatch used *********************************/
           {
@@ -246,6 +244,9 @@
           this.initInput()
           
           console.log("ropeSoftBody", this.ropeSoftBody.m_nodes.at(0).m_x.x(), this.ropeSoftBody.m_nodes.at(0).m_x.y(), this.ropeSoftBody.m_nodes.at(0).m_x.z())
+
+          this.rigidRope({x:5, y:5, z:20}, 20)
+
 
         }
 
@@ -317,31 +318,68 @@
           return brick
         }
 
+        rigidRope(position = {x: number, y: number, z: number}, numberOfPoint)
+        {
+          this.ball.length = numberOfPoint;
+          this.ball[0] = this.physics.add.sphere({
+          mass: 1,
+          x: position.x,
+          y: position.y,
+          z: position.z,
+          radius:0.1,
+          collisionFlags: 2,})
+
+            for(let i = 1; i< numberOfPoint; i++)
+            {
+                this.ball[i] = this.physics.add.sphere({
+                mass: 0.05,
+                x: position.x,
+                y: position.y,
+                z: position.z - 0.2*i,  
+                radius:0.1,
+                collisionFlags: 0,
+              })
+              this.constraint = this.physics.add.constraints.pointToPoint(this.ball[i-1].body, this.ball[i].body, {
+              // the offset from the center of each object
+              pivotA: { z: 0 },
+              pivotB: { z: 0.2  }
+              }) 
+            }
+        }
+
         initInput()
         {
           window.addEventListener(
             "keydown",
-            (envent) => {
+            (event) => {
               switch (event.code) {
                 case "KeyS":
                 case "ArrowDown":
                   // Handle "back"
                   hoistPos.y -= 0.1;
+                  this.ball[0].position.y -= 0.1;
+                  this.ball[0].body.needUpdate = true;
                   break;
                 case "KeyW":
                 case "ArrowUp":
                   // Handle "forward"
                   hoistPos.y += 0.1;
+                  this.ball[0].position.y += 0.1;
+                  this.ball[0].body.needUpdate = true;
                   break;
                 case "KeyA":
                 case "ArrowLeft":
                   // Handle "turn left"
                   hoistPos.x -= 0.1;
+                  this.ball[0].position.x -= 0.1;
+                  this.ball[0].body.needUpdate = true;
                   break;
                 case "KeyD":
                 case "ArrowRight":
                   // Handle "turn right"
                   hoistPos.x += 0.1;
+                  this.ball[0].position.x += 0.1;
+                  this.ball[0].body.needUpdate = true;
                   break;
 
                 case "Shift":
@@ -459,9 +497,9 @@
                 case "Enter": 
                   this.brick = this.addBrick(
                     {
-                      x:this.ropeSoftBody.m_nodes.at(0).m_x.x(), 
-                      y:this.ropeSoftBody.m_nodes.at(0).m_x.y(), 
-                      z:this.ropeSoftBody.m_nodes.at(0).m_x.z()-0.03*4
+                      x:this.ropeSoftBody.m_nodes.at((ropeBodyUse === true ) ? ropeNumSegmentsY : 0).m_x.x(), 
+                      y:this.ropeSoftBody.m_nodes.at((ropeBodyUse === true ) ? ropeNumSegmentsY : 0).m_x.y(), 
+                      z:this.ropeSoftBody.m_nodes.at((ropeBodyUse === true ) ? ropeNumSegmentsY : 0).m_x.z()-0.03*4
                     }, 
                     {
                       x: 0,
@@ -470,7 +508,28 @@
                     }, 
                     4
                   );
-                  this.ropeSoftBody.appendAnchor(0, this.brick.body.ammo, false, 1)
+                  this.ropeSoftBody.appendAnchor((ropeBodyUse === true ) ? ropeNumSegmentsY : 0, this.brick.body.ammo, false, 1)
+                break;
+
+                case "NumpadEnter": 
+                this.brick = this.addBrick(
+                    {
+                      x:this.ball[this.ball.length-1].position.x, 
+                      y:this.ball[this.ball.length-1].position.y, 
+                      z:this.ball[this.ball.length-1].position.z-0.03*4
+                    }, 
+                    {
+                      x: 0,
+                      y: 0, 
+                      z: 0
+                    }, 
+                    4
+                  );
+                  this.physics.add.constraints.pointToPoint(this.ball[this.ball.length-1].body,this.brick.body, {
+                    // the offset from the center of each object
+                    pivotA: { z: -0.1 },
+                    pivotB: { z: 0.1  }
+                  })
                 break;
               }
             }
