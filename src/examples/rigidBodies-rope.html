@@ -65,48 +65,14 @@
             this.ball[7] = this.rigidTwistRope({x:0, y:5, z:20}, length, 0.1)
             this.ball[8] = this.rigidP2PRope({x:-5, y:5, z:20}, length, 0.1)
          
-
-          const dof = x => {
-            this.ball1 = this.physics.add.sphere({
-              mass: 1,
-              x: x,
-              y: 0,
-              z: 0,
-              radius:0.1,
-              collisionFlags: 2,})
-
-            this.ball2 = this.physics.add.sphere({
-              mass: 1,
-              x: x,
-              y: 0,
-              z: -1,
-              radius:0.1,
-              })
-
-              this.ball3 = this.physics.add.sphere({
-              mass: 1,
-              x: x,
-              y: 0,
-              z: -2,
-              radius:0.1,
-              })
-
-            this.physics.add.constraints.dof(this.ball1.body, this.ball2.body, { center: true })
-            this.physics.add.constraints.dof(this.ball2.body, this.ball3.body, { center: true })
-
-            // this.box2 = box1 // we rotate this box in update()
-          }
-
-
           console.log(this)
-
-
         }
+
 
         update(time) 
         {
 
-          /*** Friction with air ***/ 
+          /*** Friction with air ***/ // just applied to the last brick 
           this.brick.body.applyForceX(- 0.05* this.brick.body.velocity.x * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
           this.brick.body.applyForceY(- 0.05* this.brick.body.velocity.y * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
           this.brick.body.applyForceZ(- 0.05* this.brick.body.velocity.z * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
@@ -155,7 +121,9 @@
               frameA: { x: 0, y: 0, z: -0.1 },
               frameB: { x: 0, y: 0, z: 0.1 }
                 })
+               this.constraint.setAngularOnly(true)
             }
+            console.log("twist", this.constraint)
             return ball
         }
 
@@ -184,6 +152,7 @@
               this.constraint.setLinearLowerLimit(0)
               this.constraint.setLinearUpperLimit(0)
             }
+            console.log("dof", this.constraint)
             return ball
         }
 
@@ -214,6 +183,7 @@
               pivotB: { z: 0.2  }
               }) 
             }
+            console.log("p2p", this.constraint)
             return ball
         }
 
