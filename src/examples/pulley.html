@@ -166,7 +166,6 @@
 
           // Glue the rope to the pulley
           const influence = 1
-
           if(ropeBodyUse == true) /*********************************** if CreateRope used *********************************/
           {
             this.ropeSoftBody.appendAnchor(0, this.pulley[0].body.ammo, false, influence)
@@ -179,7 +178,6 @@
           this.ropeSoftBody.setFriction(1)
           this.ropeSoftBody.setRollingFriction(1)
 
-          this.brick = this.addBrick({x:5, y:5, z:5}, {x:0, y:0, z:0}, 4, 2)
           this.initInput()
 
 
@@ -216,10 +214,6 @@
               this.pulley[i].body.needUpdate = true
           }
 
-          // this.brick.rotation.z = brickRotZ
-          // this.brick.rotation.y = brickRotY
-          // this.brick.rotation.x = brickRotX
-          // this.brick.body.needUpdate = true
           if (brickSpawn===true)
            { 
             this.leftArm.position.set(  this.brick.position.x,
@@ -252,11 +246,7 @@
             this.brick.body.applyForceY(- 0.05* this.brick.body.velocity.y * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
             this.brick.body.applyForceZ(- 0.05* this.brick.body.velocity.z * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
           }
-
-            // console.log(this.brick.rotation)
-            // console.log(this.brick.quaternion)
           
-
         }
 
         addBrick = (position = {x: number, y: number, z: number}, rotation = {x: number, y: number, z: number}, scale, collisionFlags)=> {
@@ -283,29 +273,21 @@
             (event) => {
               switch (event.code) {
                 case "KeyS":
-                    brickRotX -= 0.01;
-                    break;
                 case "ArrowDown":
                   // Handle "back"
                   pulleyPos.y -= 0.01;
                   break;
                 case "KeyW":
-                    brickRotX += 0.01;
-                    break;
                 case "ArrowUp":
                   // Handle "forward"
                   pulleyPos.y += 0.01;
                   break;
                 case "KeyA":
-                    brickRotY -= 0.01;
-                    break;
                 case "ArrowLeft":
                   // Handle "turn left"
                   pulleyPos.x -= 0.01;
                   break;
                 case "KeyD":
-                    brickRotY += 0.01;
-                    break;
                 case "ArrowRight":
                   // Handle "turn right"
                   pulleyPos.x += 0.01;
