@@ -48,7 +48,7 @@
       pulleyPos.set(0, 0, 8)
       ropePos.set(pulleyPos.x, pulleyPos.y, pulleyPos.z-pulleyScale*pulleyRadius)
 
-      const ropeBodyUse = false;  
+      const ropeBodyUse = true;  
         
       let value = Math.PI/4
 
@@ -82,18 +82,11 @@
                 cylinder.position.x += pulleyPos.x;
                 cylinder.position.y += pulleyPos.y;
                 cylinder.position.z += pulleyPos.z;
-                this.physics.add.existing(cylinder, { shape: 'convex', collisionFlags :(pos === 0?2:2), mass: 10000 })
+                this.physics.add.existing(cylinder, { shape: 'convex', collisionFlags :(pos === 0?2:2), mass: 100000 })
                 pos = 1
                 return cylinder
           })
-        //   for (let i = 0; i < this.pulley.length - 1; i++) {
-        //     const constraint = this.physics.add.constraints.fixed(this.pulley[i].body, this.pulley[i + 1].body)
-        //     // [bug] it is not yet possible to choose to "disableCollisionsBetweenLinkedBodies",
-        //     // so we remove the constraint add a new one.
-        //     this.physics.physicsWorld.removeConstraint(constraint)
-        //     this.physics.physicsWorld.addConstraint(constraint, true)
-        //   }
-
+   
 
           const ropeGeometry = new THREE.PlaneGeometry(ropeWidth, ropeLength, ropeNumSegmentsZ, ropeNumSegmentsY)
 
@@ -294,28 +287,28 @@
                     break;
                 case "ArrowDown":
                   // Handle "back"
-                  pulleyPos.y -= 0.1;
+                  pulleyPos.y -= 0.01;
                   break;
                 case "KeyW":
                     brickRotX += 0.01;
                     break;
                 case "ArrowUp":
                   // Handle "forward"
-                  pulleyPos.y += 0.1;
+                  pulleyPos.y += 0.01;
                   break;
                 case "KeyA":
                     brickRotY -= 0.01;
                     break;
                 case "ArrowLeft":
                   // Handle "turn left"
-                  pulleyPos.x -= 0.1;
+                  pulleyPos.x -= 0.01;
                   break;
                 case "KeyD":
                     brickRotY += 0.01;
                     break;
                 case "ArrowRight":
                   // Handle "turn right"
-                  pulleyPos.x += 0.1;
+                  pulleyPos.x += 0.01;
                   break;
 
                 case "Shift":
