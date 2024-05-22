@@ -24,6 +24,12 @@
 
       let pulleyRotValue = 0;
 
+      let brickSpawn = false;
+
+      let brickRotZ = 0;
+      let brickRotY = 0;
+      let brickRotX = 0;
+
       const pulleyPos =  new THREE.Vector3();
       const ropePos =  new THREE.Vector3();
 
@@ -36,9 +42,10 @@
       // The pulley
       const pulleyRadius = 0.7
       const pulleyHeight = 0.3
+      const pulleyScale = 1
 
       pulleyPos.set(0, 0, 8)
-      ropePos.set(pulleyPos.x, pulleyPos.y, pulleyPos.z-pulleyRadius)
+      ropePos.set(pulleyPos.x, pulleyPos.y, pulleyPos.z-pulleyScale*pulleyRadius)
 
       const ropeBodyUse = false;  
         
@@ -65,8 +72,8 @@
 
           const pulleyData = [
           {x: 0, y: 0,                      z: 0, height: pulleyHeight  , radiusTop: pulleyRadius, radiusBottom: pulleyRadius },    
-          {x: 0, y: 4 * pulleyHeight/6,     z: 0, height: pulleyHeight/3, radiusTop: 1.25*pulleyRadius, radiusBottom: 1.25*pulleyRadius },
-          {x: 0, y: - 4 * pulleyHeight/6,   z: 0, height: pulleyHeight/3, radiusTop: 1.25*pulleyRadius, radiusBottom: 1.25*pulleyRadius },
+          {x: 0, y: (pulleyScale * 4 * pulleyHeight)/6,     z: 0, height: pulleyHeight/3, radiusTop: 1.25*pulleyRadius, radiusBottom: 1.25*pulleyRadius },
+          {x: 0, y: - (pulleyScale * 4 * pulleyHeight)/6,   z: 0, height: pulleyHeight/3, radiusTop: 1.25*pulleyRadius, radiusBottom: 1.25*pulleyRadius },
           ]
             let pos = 0
             this.pulley = pulleyData.map(d => {
@@ -74,7 +81,8 @@
                 cylinder.position.x += pulleyPos.x;
                 cylinder.position.y += pulleyPos.y;
                 cylinder.position.z += pulleyPos.z;
-                this.physics.add.existing(cylinder, { shape: 'convex', collisionFlags :(pos === 0?2:2), mass: 100000 })
+                cylinder.scale.set(pulleyScale, pulleyScale, pulleyScale)
+                this.physics.add.existing(cylinder, { shape: 'convex', collisionFlags :(pos === 0?2:2), mass: 10000 })
                 pos = 1
                 return cylinder
           })
@@ -178,30 +186,85 @@
           this.ropeSoftBody.setFriction(1)
           this.ropeSoftBody.setRollingFriction(1)
 
-          this.brick = this.addBrick({x:0, y:0, z:0}, {x:0, y:0, z:0}, 4)
+          this.brick = this.addBrick({x:5, y:5, z:5}, {x:0, y:0, z:0}, 4, 2)
           this.initInput()
+
+
+          const armParams = {
+            mass: 1,
+            z: 2,
+            height: 0.7,
+            width: 0.1,
+            depth: 0.4,
+            collisionFlags: 2
+          }
+          const addArm = x => {
+            const arm = this.physics.add.box({
+              ...armParams,
+              x
+            })
+            arm.body.setFriction(1)
+            arm.body.setDamping(0.5,0.5);
+            return arm
+          }
+          this.leftArm = addArm(-0.3)
+          this.rightArm = addArm(0.3)
 
         }
 
         update(time) 
         {
 
-        for (let i = 0; i < this.pulley.length; i++) {
-            this.pulley[i].rotation.y = pulleyRotValue;
-            this.pulley[i].position.setX(pulleyPos.x); 
-            this.pulley[i].position.setY(i === 0 ? pulleyPos.y : (i===1? pulleyPos.y + 4 * pulleyHeight/6:pulleyPos.y - 4 * pulleyHeight/6)); 
-            this.pulley[i].position.setZ(pulleyPos.z);
-            this.pulley[i].body.needUpdate = true
+          for (let i = 0; i < this.pulley.length; i++) {
+              this.pulley[i].rotation.y = pulleyRotValue;
+              this.pulley[i].position.setX(pulleyPos.x); 
+              this.pulley[i].position.setY(i === 0 ? pulleyPos.y : (i===1? pulleyPos.y + 4 * pulleyHeight/6:pulleyPos.y - 4 * pulleyHeight/6)); 
+              this.pulley[i].position.setZ(pulleyPos.z);
+              this.pulley[i].body.needUpdate = true
+          }
+
+          // this.brick.rotation.z = brickRotZ
+          // this.brick.rotation.y = brickRotY
+          // this.brick.rotation.x = brickRotX
+          // this.brick.body.needUpdate = true
+          if (brickSpawn===true)
+           { 
+            this.leftArm.position.set(  this.brick.position.x,
+                                        this.brick.position.y,
+                                        this.brick.position.z 
+                                      )
+            this.leftArm.translateX(0.4)
+
+            this.rightArm.position.set( this.brick.position.x,
+                                        this.brick.position.y,
+                                        this.brick.position.z 
+                                      )
+            this.rightArm.translateX(-0.4)
+
+            this.leftArm.quaternion._w = this.brick.quaternion.w 
+            this.leftArm.quaternion._x = this.brick.quaternion.x
+            this.leftArm.quaternion._y = this.brick.quaternion.y
+            this.leftArm.quaternion._z = this.brick.quaternion.z
+
+            this.rightArm.quaternion._w = this.brick.quaternion.w 
+            this.rightArm.quaternion._x = this.brick.quaternion.x
+            this.rightArm.quaternion._y = this.brick.quaternion.y
+            this.rightArm.quaternion._z = this.brick.quaternion.z
+
+            this.leftArm.body.needUpdate = true
+            this.rightArm.body.needUpdate = true
+          }
+
+            // console.log(this.brick.rotation)
+            // console.log(this.brick.quaternion)
+          // /*** Friction with air ***/ 
+          // this.brick.body.applyForceX(- 0.05* this.brick.body.velocity.x * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+          // this.brick.body.applyForceY(- 0.05* this.brick.body.velocity.y * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+          // this.brick.body.applyForceZ(- 0.05* this.brick.body.velocity.z * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+
         }
 
-          /*** Friction with air ***/ 
-          this.brick.body.applyForceX(- 0.05* this.brick.body.velocity.x * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
-          this.brick.body.applyForceY(- 0.05* this.brick.body.velocity.y * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
-          this.brick.body.applyForceZ(- 0.05* this.brick.body.velocity.z * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
-
-        }
-
-        addBrick = (position = {x: number, y: number, z: number}, rotation = {x: number, y: number, z: number}, scale)=> {
+        addBrick = (position = {x: number, y: number, z: number}, rotation = {x: number, y: number, z: number}, scale, collisionFlags)=> {
           const brick = this.physics.add.box({
             mass: 10,
             x: position.x,
@@ -210,7 +273,7 @@
             height: 0.22*scale,
             width: 0.105*scale,
             depth: 0.06*scale,
-            collisionFlags: 0,
+            collisionFlags: collisionFlags,
             scale: scale,
           })
           brick.body.setFriction(1)
@@ -225,21 +288,29 @@
             (event) => {
               switch (event.code) {
                 case "KeyS":
+                    brickRotX -= 0.01;
+                    break;
                 case "ArrowDown":
                   // Handle "back"
                   pulleyPos.y -= 0.1;
                   break;
                 case "KeyW":
+                    brickRotX += 0.01;
+                    break;
                 case "ArrowUp":
                   // Handle "forward"
                   pulleyPos.y += 0.1;
                   break;
                 case "KeyA":
+                    brickRotY -= 0.01;
+                    break;
                 case "ArrowLeft":
                   // Handle "turn left"
                   pulleyPos.x -= 0.1;
                   break;
                 case "KeyD":
+                    brickRotY += 0.01;
+                    break;
                 case "ArrowRight":
                   // Handle "turn right"
                   pulleyPos.x += 0.1;
@@ -260,24 +331,29 @@
                       z:this.ropeSoftBody.m_nodes.at((ropeBodyUse === true ) ? ropeNumSegmentsY : 0).m_x.z()-0.03*4
                     }, 
                     {
-                      x: 0,
-                      y: 0, 
-                      z: 0
+                      x: 5,
+                      y: 2, 
+                      z: 1
                     }, 
-                    4
+                    4,
+                    0
                   );
+                  console.log(this.brick.rotation)
+                  brickSpawn = true;
                   this.ropeSoftBody.appendAnchor((ropeBodyUse === true ) ? ropeNumSegmentsY : 0, this.brick.body.ammo, false, 1)
                 break;
 
                 case "+":
                 case "NumpadAdd":
                     pulleyRotValue += 0.01
+                    brickRotZ +=0.01
                   
                 break;
 
                 case "-":
                 case "NumpadSubtract":
                     pulleyRotValue -= 0.01
+                    brickRotZ -=0.01
                   
                 break;
               }
