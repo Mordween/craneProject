@@ -40,9 +40,10 @@
       const ropeNumSegmentsY = 50
 
       // The pulley
-      const pulleyRadius = 0.7
-      const pulleyHeight = 0.3
-      const pulleyScale = 1
+      const pulleyScale = 0.5
+      const pulleyRadius = 0.7*pulleyScale
+      const pulleyHeight = 0.3*pulleyScale
+
 
       pulleyPos.set(0, 0, 8)
       ropePos.set(pulleyPos.x, pulleyPos.y, pulleyPos.z-pulleyScale*pulleyRadius)
@@ -81,7 +82,6 @@
                 cylinder.position.x += pulleyPos.x;
                 cylinder.position.y += pulleyPos.y;
                 cylinder.position.z += pulleyPos.z;
-                cylinder.scale.set(pulleyScale, pulleyScale, pulleyScale)
                 this.physics.add.existing(cylinder, { shape: 'convex', collisionFlags :(pos === 0?2:2), mass: 10000 })
                 pos = 1
                 return cylinder
@@ -253,14 +253,16 @@
 
             this.leftArm.body.needUpdate = true
             this.rightArm.body.needUpdate = true
+
+            // /*** Friction with air ***/ 
+            this.brick.body.applyForceX(- 0.05* this.brick.body.velocity.x * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+            this.brick.body.applyForceY(- 0.05* this.brick.body.velocity.y * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+            this.brick.body.applyForceZ(- 0.05* this.brick.body.velocity.z * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
           }
 
             // console.log(this.brick.rotation)
             // console.log(this.brick.quaternion)
-          // /*** Friction with air ***/ 
-          // this.brick.body.applyForceX(- 0.05* this.brick.body.velocity.x * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
-          // this.brick.body.applyForceY(- 0.05* this.brick.body.velocity.y * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
-          // this.brick.body.applyForceZ(- 0.05* this.brick.body.velocity.z * 1 * this.physics.physicsWorld.getWorldInfo().air_density )
+          
 
         }
 
